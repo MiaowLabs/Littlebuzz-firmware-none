@@ -1,0 +1,101 @@
+C51 COMPILER V9.00   PWM                                                                   07/23/2016 15:35:44 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE PWM
+OBJECT MODULE PLACED IN .\Output\pwm.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE Driver\src\pwm.c LARGE BROWSE INCDIR(.\Common\inc;.\Driver\inc;.\BSP;.\Star
+                    -tup;.\User) DEBUG OBJECTEXTEND PRINT(.\Listing\pwm.lst) OBJECT(.\Output\pwm.obj)
+
+line level    source
+
+   1          
+   2          #include "PWM.h"
+   3          
+   4          /***************************************************************
+   5          ** 函数名称: PWMInit
+   6          ** 功能描述: PWM初始化函数
+   7          ** 输　入:   
+   8          ** 输　出:   
+   9          ** 全局变量: 
+  10          ** 作　者:   喵呜实验室
+  11          ** 淘  宝：  Http://miaowlabs.taobao.com
+  12          ** 日　期:   2014年08月01日
+  13          ***************************************************************/
+  14          void PWMInit()
+  15          {       
+  16   1      
+  17   1              P_SW2|=0x80;    //使能访问XSFR
+  18   1      
+  19   1              PWMCFG = 0x00;                  //配置PWM的输出初始电平为低电平
+  20   1              PWMCKS = 0x00;                  //选择PWM的时钟为Fosc/(0+1)=20M
+  21   1              PWMIF=0x00; 
+  22   1              PWMFDCR=0x00; 
+  23   1      
+  24   1              PWMC = 1001;                   //单位：脉冲时钟 设置PWM周期(最大值为32767)      PWM频率=20M/1000=20k
+  25   1              
+  26   1              PWM2T1 = 1000;                 //设置PWM3第1次反转的PWM计数
+  27   1          PWM2T2 = 1001;                              //设置PWM3第2次反转的PWM计数
+  28   1                                                                              //占空比为(PWM3T2-PWM3T1)/PWMC
+  29   1                                                                              //初始PWM3占空比为100%
+  30   1              PWM3T1 = 1000;                 //设置PWM3第1次反转的PWM计数
+  31   1          PWM3T2 = 1001;                              //设置PWM3第2次反转的PWM计数
+  32   1                                                                              //占空比为(PWM3T2-PWM3T1)/PWMC
+  33   1                                                                              //初始PWM3占空比为100%
+  34   1      
+  35   1              PWM4T1 = 1000;                 //设置PWM4第1次反转的PWM计数
+  36   1          PWM4T2 = 1001;                              //设置PWM4第2次反转的PWM计数
+  37   1                                                                              //占空比为(PWM4T2-PWM4T1)/PWMC
+  38   1                                                                              //初始PWM4占空比为100%
+  39   1              PWM5T1 = 1000;                 //设置PWM3第1次反转的PWM计数
+  40   1          PWM5T2 = 1001;                              //设置PWM3第2次反转的PWM计数
+  41   1                                                                              //占空比为(PWM3T2-PWM3T1)/PWMC
+  42   1                                                                              //初始PWM3占空比为100%
+  43   1              PWM2CR=0x00; 
+  44   1              PWM3CR=0x00;
+  45   1              PWM4CR=0x00; 
+  46   1              PWM5CR=0x00; 
+  47   1      
+  48   1          PWMCR = 0x8F;                   //使能PWM信号
+  49   1         
+  50   1              //P_SW2 &= ~0x80;
+  51   1       }
+  52          /*
+  53          void PCAInit()
+  54          {
+C51 COMPILER V9.00   PWM                                                                   07/23/2016 15:35:44 PAGE 2   
+
+  55                  CMOD = 0x04;//选择定时器0的溢出脉冲作为计数源
+  56                  AUXR1 |= 0x20;  //切换引脚
+  57                  PCA_PWM0 = 0x00 ;//8位PWM,无中断
+  58                  PCA_PWM1= 0x00;
+  59                  CL = 0;         //自由递增计数的16位PCA定时器的值,初始化为0
+  60                  CH = 0;
+  61                  CCAP0H = CCAP0L = 0x00; //用于控制占空比，占空比=(255-CCAPnL)/255*100%
+  62                  CCAP1H = CCAP1L = 0x00; //初始化占空比为50%
+  63                  CR = 1; //PCA计数器阵列开始                                                                              
+  64                   //PWM的频率=PCA时钟输入源频率/256
+  65          }
+  66          */
+  67          //本函数输入的4个值取值范围为0-1000 1000电机停，0转速最高，输入数据不能超过取值范围，否则会大姨妈
+  68          void PWM(unsigned int PWMa,unsigned int PWMb,unsigned int PWMc,unsigned int PWMd)
+  69          {  
+  70   1              PWM2T1 = PWMa;  
+  71   1              PWM3T1 = PWMb;  
+  72   1              PWM4T1 = PWMc;
+  73   1              PWM5T1 = PWMd;
+  74   1      }
+  75          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    161    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----       8
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

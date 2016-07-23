@@ -1,0 +1,130 @@
+C51 COMPILER V9.00   EEPROM                                                                07/23/2016 15:35:44 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE EEPROM
+OBJECT MODULE PLACED IN .\Output\EEPROM.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE Driver\src\EEPROM.C LARGE BROWSE INCDIR(.\Common\inc;.\Driver\inc;.\BSP;.\S
+                    -tartup;.\User) DEBUG OBJECTEXTEND PRINT(.\Listing\EEPROM.lst) OBJECT(.\Output\EEPROM.obj)
+
+line level    source
+
+   1          #include "IAP15W4K61S4.h"
+   2          #include <EEPROM.h>
+   3          #include <intrins.h>
+   4          #include "nrf24l0102.h"
+   5          #include <MPU6050.H>
+   6          #include "func.h"
+   7          
+   8          #define CMD_IDLE    0            
+   9          #define CMD_READ    1              
+  10          #define CMD_PROGRAM 2               
+  11          #define CMD_ERASE   3              
+  12          
+  13          #define ENABLE_IAP 0x82           //if SYSCLK<20MHz
+  14          //extern char g_fOffsetx,g_fOffsety;            
+  15          extern int g_x,g_y,g_z;
+  16          //extern double Angle,Angley;
+  17          void IapIdle()
+  18          {
+  19   1          IAP_CONTR = 0;                 
+  20   1          IAP_CMD = 0;                    
+  21   1          IAP_TRIG = 0;                  
+  22   1          IAP_ADDRH = 0x80;              
+  23   1          IAP_ADDRL = 0;
+  24   1      }
+  25          unsigned char IapReadByte(unsigned int addr) //读取1字节
+  26          {
+  27   1          unsigned char dat;                  
+  28   1          IAP_CONTR = ENABLE_IAP;       
+  29   1          IAP_CMD = CMD_READ;           
+  30   1          IAP_ADDRL = addr;             
+  31   1          IAP_ADDRH = addr >> 8;          
+  32   1          IAP_TRIG = 0x5a;             
+  33   1          IAP_TRIG = 0xa5;             
+  34   1          _nop_();                      
+  35   1          dat = IAP_DATA;
+  36   1          IapIdle();  
+  37   1          return dat;                   
+  38   1      }
+  39          
+  40          void IapProgramByte(unsigned int addr, unsigned char dat) //写入1字节
+  41          {
+  42   1          IAP_CONTR = ENABLE_IAP;        
+  43   1          IAP_CMD = CMD_PROGRAM;        
+  44   1          IAP_ADDRL = addr;             
+  45   1          IAP_ADDRH = addr >> 8;         
+  46   1          IAP_DATA = dat;                
+  47   1          IAP_TRIG = 0x5a;              
+  48   1          IAP_TRIG = 0xa5;                
+  49   1          _nop_();    
+  50   1          IapIdle();  
+  51   1      }
+  52          
+  53          void IapEraseSector(unsigned int addr) //扇区擦除
+  54          {
+C51 COMPILER V9.00   EEPROM                                                                07/23/2016 15:35:44 PAGE 2   
+
+  55   1          IAP_CONTR = ENABLE_IAP;        
+  56   1          IAP_CMD = CMD_ERASE;          
+  57   1          IAP_ADDRL = addr;             
+  58   1          IAP_ADDRH = addr >> 8;         
+  59   1          IAP_TRIG = 0x5a;              
+  60   1          IAP_TRIG = 0xa5;               
+  61   1          _nop_(); 
+  62   1          IapIdle();  
+  63   1      }
+  64          void IAP_Gyro()   //陀螺仪校准
+  65          {
+  66   1              IapEraseSector(0xE200); //扇区擦除
+  67   1              g_fGyroYOffset = DataSynthesis(GYRO_YOUT_H);  //读取陀螺仪数据
+  68   1              g_fGyroXOffset = DataSynthesis(GYRO_XOUT_H);
+  69   1              g_fGyroZOffset = DataSynthesis(GYRO_ZOUT_H);
+  70   1              IapProgramByte(0xE200,g_fGyroYOffset>>8);  //写入数据至EEPROM
+  71   1              IapProgramByte(0xE201,g_fGyroYOffset); 
+  72   1              IapProgramByte(0xE202,g_fGyroXOffset>>8);     //陀螺仪数据存放至114扇区
+  73   1              IapProgramByte(0xE203,g_fGyroXOffset);
+  74   1              IapProgramByte(0xE204,g_fGyroZOffset>>8);
+  75   1              IapProgramByte(0xE205,g_fGyroZOffset);
+  76   1              IapProgramByte(0xE206,1);
+  77   1      }
+  78          void IAP_Angle()
+  79          {
+  80   1              IapEraseSector(0xE400);           //加速度计数据存放至115扇区
+  81   1              //a_x=(char)Angle;
+  82   1              //a_y=(char)Angley;      
+  83   1              IapProgramByte(0xE400,1);
+  84   1              IapProgramByte(0xE401,g_fOffsetx);
+  85   1              IapProgramByte(0xE402,g_fOffsety);
+  86   1      }
+  87          void IAPRead()
+  88          {
+  89   1              unsigned char i;
+  90   1              i=IapReadByte(0xE206);
+  91   1              if(i==1)      //判断数据是否已经更新过，更新过才读取数据
+  92   1              {
+  93   2              g_y=IapReadByte(0xE200)<<8|IapReadByte(0xE201);
+  94   2              g_x=IapReadByte(0xE202)<<8|IapReadByte(0xE203);
+  95   2              g_z=IapReadByte(0xE204)<<8|IapReadByte(0xE205);
+  96   2              }
+  97   1              i=IapReadByte(0xE400);
+  98   1              if(i==1)      //判断数据是否已经更新过，更新过才读取数据
+  99   1              {
+ 100   2              g_fOffsetx=IapReadByte(0xE401);
+ 101   2              g_fOffsety=IapReadByte(0xE402);
+ 102   2              }
+ 103   1      }
+ 104          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    394    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

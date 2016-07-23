@@ -1,0 +1,94 @@
+C51 COMPILER V9.00   IMU                                                                   07/23/2016 15:35:43 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE IMU
+OBJECT MODULE PLACED IN .\Output\imu.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE Common\src\imu.c LARGE BROWSE INCDIR(.\Common\inc;.\Driver\inc;.\BSP;.\Star
+                    -tup;.\User) DEBUG OBJECTEXTEND PRINT(.\Listing\imu.lst) OBJECT(.\Output\imu.obj)
+
+line level    source
+
+   1          #include "IAP15W4K61S4.h"
+   2          #include <imu.h>
+   3          #include <math.h>
+   4          #include "func.h"
+   5          
+   6          #define pi 3.14159265f 
+   7                                    
+   8          #define Kp 0.8f   // proportional gain governs rate of convergence to accelerometer/magnetometer          
+             -           
+   9          #define Ki 0.001f      // integral gain governs rate of convergence of gyroscope biases
+  10                               
+  11          #define halfT 0.005f                            // 采样周期的一半
+  12                     
+  13          float idata q0=1,q1=0,q2=0,q3=0;   // 四元数的元素，代表估计方向
+  14          float idata exInt=0,eyInt=0,ezInt=0;  // 按比例缩小积分误差
+  15          void IMUupdate(float gx, float gy, float gz, float ax, float ay, float az)
+  16          {
+  17   1        float idata norm;
+  18   1        float idata vx, vy, vz;
+  19   1        float idata ex, ey, ez;
+  20   1      
+  21   1        float idata q0q0 = q0*q0;
+  22   1        float idata q0q1 = q0*q1;
+  23   1        float idata q0q2 = q0*q2;
+  24   1        float idata q0q3 = q0*q3;
+  25   1        float idata q1q1 = q1*q1;
+  26   1        float idata q1q2 = q1*q2;
+  27   1        float idata q1q3 = q1*q3;
+  28   1        float idata q2q2 = q2*q2;
+  29   1        float idata q2q3 = q2*q3;
+  30   1        float idata q3q3 = q3*q3;
+  31   1      
+  32   1        norm = sqrt(ax*ax + ay*ay + az*az);      
+  33   1        ax = ax /norm;
+  34   1        ay = ay / norm;
+  35   1        az = az / norm;
+  36   1                 
+  37   1        vx = 2*(q1q3 - q0q2);                                                                                         
+  38   1        vy = 2*(q0q1 + q2q3);
+  39   1        vz = q0q0 - q1q1 - q2q2 + q3q3 ;
+  40   1      
+  41   1        ex = (ay*vz - az*vy) ;                                                                
+  42   1        ey = (az*vx - ax*vz) ;
+  43   1        ez = (ax*vy - ay*vx) ;
+  44   1      
+  45   1        exInt = exInt + ex * Ki;                                                               
+  46   1        eyInt = eyInt + ey * Ki;
+  47   1        ezInt = ezInt + ez * Ki;
+  48   1      
+  49   1        gx = gx + Kp*ex + exInt;                                                                                              
+  50   1        gy = gy + Kp*ey + eyInt;
+  51   1        gz = gz + Kp*ez + ezInt;                                                                                      
+  52   1                                                 
+  53   1        q0 = q0 + (-q1*gx - q2*gy - q3*gz)*halfT;
+C51 COMPILER V9.00   IMU                                                                   07/23/2016 15:35:43 PAGE 2   
+
+  54   1        q1 = q1 + (q0*gx + q2*gz - q3*gy)*halfT;
+  55   1        q2 = q2 + (q0*gy - q1*gz + q3*gx)*halfT;
+  56   1        q3 = q3 + (q0*gz + q1*gy - q2*gx)*halfT;
+  57   1      
+  58   1        norm = sqrt(q0*q0 + q1*q1 + q2*q2 + q3*q3);
+  59   1        q0 = q0 / norm;
+  60   1        q1 = q1 / norm;
+  61   1        q2 = q2 / norm;
+  62   1        q3 = q3 / norm;
+  63   1      
+  64   1        pitch=asin(2*(q0*q2-q1*q3 ))* 57.2957795f; // 俯仰
+  65   1        roll=asin(2*(q0*q1+q2*q3 ))* 57.2957795f; // 横滚
+  66   1      //  yaw= atan2( 2 * (q0 * q1 + q2 * q3), q0q0 - q1q1 - q2q2 + q3q3 )*57.2957795f;//yaw
+  67   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1915    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----      24
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =     28      68
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

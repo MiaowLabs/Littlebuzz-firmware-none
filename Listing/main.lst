@@ -1,0 +1,155 @@
+C51 COMPILER V9.00   MAIN                                                                  07/23/2016 15:35:45 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Output\main.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE User\main.c LARGE BROWSE INCDIR(.\Common\inc;.\Driver\inc;.\BSP;.\Startup;.
+                    -\User) DEBUG OBJECTEXTEND PRINT(.\Listing\main.lst) OBJECT(.\Output\main.obj)
+
+line level    source
+
+   1          /********************************************************************
+   2          作者：Songyimiao
+   3          建立日期: 20160411
+   4          版本：V1.0
+   5          喵呜实验室版权所有
+   6          /********************************************************************/
+   7          #include "includes.h"
+   8           
+   9          /***************************************************************
+  10          ** 作　  者: Songyibiao
+  11          ** 官    网：http://www.miaowlabs.com
+  12          ** 淘    宝：http://miaowlabs.taobao.com
+  13          ** 日　  期: 2015年11月29日
+  14          ** 函数名称: main()
+  15          ** 功能描述: 主函数            
+  16          ** 输　  入:   
+  17          ** 输　  出:   
+  18          ** 备    注: 参考STC开源四轴 感谢刘同学
+  19              //失控：TxBuf[0] 
+  20                  //油门：TxBuf[1]
+  21              //Yaw：     TxBuf[4]
+  22              //俯仰：TxBuf[2]
+  23              //横滚：TxBuf[3]
+  24          ********************喵呜实验室版权所有**************************
+  25          ***************************************************************/
+  26          void main()
+  27          {
+  28   1              DisableInterrupts;//禁止总中断
+  29   1              DriversInit();
+  30   1              ADCInit();      
+  31   1              MPU6050Init();
+  32   1              LEDRUN(); 
+  33   1              GetGyroRevise();        
+  34   1              LED_GREEN = 0;
+  35   1              ParametersInit();
+  36   1              Delaynms(100);  
+  37   1              
+  38   1              IAPRead();
+  39   1      
+  40   1              while(NRF24L01_Check())//检测不到24L01
+  41   1              {
+  42   2                      Delaynms(500);
+  43   2                      LED_RED=~LED_RED;  
+  44   2                      Delaynms(500);
+  45   2                      LED_RED=~LED_RED; 
+  46   2              } 
+  47   1              init_NRF24L01();
+  48   1              SetRX_Mode();    //接收模式
+  49   1      
+  50   1              Delaynms(10);    
+  51   1              RxBuf[1]=255;
+  52   1              RxBuf[2]=128; //俯仰
+  53   1              RxBuf[3]=128; //横滚
+  54   1              RxBuf[4]=128;//yaw
+C51 COMPILER V9.00   MAIN                                                                  07/23/2016 15:35:45 PAGE 2   
+
+  55   1      
+  56   1              LED2=0; //尾灯
+  57   1              TickSound();  //启动响声 用到T2
+  58   1                                      
+  59   1              EnableInterrupts;//允许总中断    
+  60   1                                                                                
+  61   1              while(1)
+  62   1              {
+  63   2                STC_ISP();    //ISP 下载不用冷启动                               
+  64   2              
+  65   2                Delay(500);
+  66   2                nRF24L01_RxPacket(RxBuf);
+  67   2                BatteryChecker();
+  68   2              if(RxBuf[5]==1)    //you
+  69   2                {
+  70   3                  DisableInterrupts;
+  71   3                      IAP_Angle();
+  72   3                      RxBuf[5]=0;
+  73   3                      TickSound();
+  74   3                      EnableInterrupts; 
+  75   3                }
+  76   2                if(RxBuf[6]==1)  //zuo
+  77   2                {
+  78   3                      DisableInterrupts;
+  79   3                      IAP_Gyro();
+  80   3                      RxBuf[6]=0;
+  81   3                      TickSound();
+  82   3                  EnableInterrupts;
+  83   3                }
+  84   2      
+  85   2                if(i>=10)
+  86   2              {
+  87   3                              i=0;
+  88   3                        if(RxBuf[8]==1)         //y
+  89   3                        {
+  90   4                              RxBuf[8]=0;
+  91   4                              g_fOffsety-=0.5;
+  92   4                      //      TickSound();
+  93   4                        }     
+  94   3                        if(RxBuf[10]==1)
+  95   3                        {
+  96   4                              RxBuf[10]=0;
+  97   4                              g_fOffsety+=0.5;
+  98   4                      //      TickSound();
+  99   4                        }     
+ 100   3                        if(RxBuf[7]==1)         //x
+ 101   3                        {
+ 102   4                              RxBuf[7]=0;
+ 103   4                              g_fOffsetx-=0.5;
+ 104   4                      //      TickSound();
+ 105   4                        }     
+ 106   3                        if(RxBuf[9]==1)
+ 107   3                        {
+ 108   4                              RxBuf[9]=0;
+ 109   4                              g_fOffsetx+=0.5;
+ 110   4                      //      TickSound();
+ 111   4                        }                             
+ 112   3              }
+ 113   2      
+ 114   2                
+ 115   2      #if 0//DEBUG_UART  //调试启用 预编译命令
+              
+C51 COMPILER V9.00   MAIN                                                                  07/23/2016 15:35:45 PAGE 3   
+
+                      OutData[0] = 45;
+                      OutData[1] = 90;  
+                      OutData[2] = g_fPower ;
+                      OutData[3] = yaw;  
+              
+                      OutPut_Data();          
+                                
+              #endif                  
+ 125   2                                              
+ 126   2              }
+ 127   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    337    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

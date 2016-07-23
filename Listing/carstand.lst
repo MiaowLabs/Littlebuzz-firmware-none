@@ -1,0 +1,227 @@
+C51 COMPILER V9.00   CARSTAND                                                              07/06/2016 14:10:03 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE CARSTAND
+OBJECT MODULE PLACED IN .\Output\carstand.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE User\carstand.c LARGE BROWSE INCDIR(.\Common\inc;.\Driver\inc;.\BSP;.\Start
+                    -up;.\User) DEBUG OBJECTEXTEND PRINT(.\Listing\carstand.lst) OBJECT(.\Output\carstand.obj)
+
+line level    source
+
+   1          /********************************************************************
+   2          作者：Songyimiao
+   3          建立日期: 20151129
+   4          版本：V2.0
+   5          喵呜实验室版权所有
+   6          /********************************************************************/
+   7          #include "includes.h"
+   8          
+   9          double pitch, yaw, roll;
+  10          double Angle_ax, Angle_ay, Angle_az;
+  11          double Angle_gx, Angle_gy, Angle_gz;
+  12          unsigned char g_fPower;
+  13          int g_fGyroXOffset,g_fGyroYOffset,g_fGyroZOffset;
+  14          char g_fOffsetx=0,g_fOffsety=0;
+  15          unsigned int xdata g_uiStartCount;
+  16          unsigned char xdata g_ucLEDCount;
+  17          int i;
+  18          /******角度控制参数******/
+  19          int   g_iAccel_X_Axis,g_iAccel_Y_Axis,g_iAccel_Z_Axis ; //加速度X轴数据
+  20          int   g_iGyro_X_Axis,g_iGyro_Y_Axis,g_iGyro_Z_Axis  ;   //陀螺仪Y轴数据
+  21          
+  22          long int  g_liAccSum;
+  23          long int  g_liGyroSum;
+  24          float g_fCarAngle;                              //车模倾角
+  25          float g_fGyroAngleSpeed;                        //角速度                        
+  26          float g_fGyroscopeAngleIntegral;        //角速度积分值
+  27          float g_fGravityAngle;                          //加速度初步计算得到的倾角
+  28          int g_iGyroOffset;
+  29          /******速度控制参数******/
+  30          int   g_iLeftMotorPulse;
+  31          int   g_iRightMotorPulse;
+  32          int   g_iLeftMotorPulseSigma;
+  33          int   g_iRightMotorPulseSigma;
+  34          float g_fCarSpeed;
+  35          float g_fCarSpeedOld;
+  36          float g_fCarPosition;
+  37          unsigned char g_ucSpeedControlPeriod ;
+  38          unsigned char g_ucSpeedControlCount ;
+  39          
+  40                     
+  41          /******蓝牙控制参数******/
+  42          float xdata g_fBluetoothSpeed;
+  43          float xdata g_fBluetoothDirection;
+  44          
+  45          /***************************************************************
+  46          ** 作　  者: Songyimiao
+  47          ** 官    网：http://www.miaowlabs.com
+  48          ** 淘    宝：http://miaowlabs.taobao.com
+  49          ** 日　  期: 2015年11月29日
+  50          ** 函数名称: DriversInit
+  51          ** 功能描述: 底层驱动初始化            
+  52          ** 输　  入:   
+  53          ** 输　  出:   
+  54          ** 备    注: 
+C51 COMPILER V9.00   CARSTAND                                                              07/06/2016 14:10:03 PAGE 2   
+
+  55          ********************喵呜实验室版权所有**************************
+  56          ***************************************************************/
+  57          void DriversInit(void)
+  58          {
+  59   1      
+  60   1              GPIOInit();
+  61   1              Timer1Init();
+  62   1              PWMInit();
+  63   1              Uart1Init();
+  64   1      
+  65   1      }
+  66          
+  67          void ParametersInit()
+  68          {
+  69   1              g_fPower = 0;
+  70   1              g_fGyroXOffset=g_fGyroYOffset=g_fGyroZOffset=0; 
+  71   1      }
+  72          
+  73          /***************************************************************
+  74          ** 作　  者: Songyimiao
+  75          ** 官    网：http://www.miaowlabs.com
+  76          ** 淘    宝：http://miaowlabs.taobao.com
+  77          ** 日　  期: 2015年11月29日
+  78          ** 函数名称: DataSynthesis
+  79          ** 功能描述: 数据合成函数            
+  80          ** 输　  入:   
+  81          ** 输　  出:   
+  82          ** 备    注: 
+  83          ********************喵呜实验室版权所有**************************
+  84          ***************************************************************/
+  85          int DataSynthesis(unsigned char REG_Address)    
+  86          {
+  87   1              char idata uiHighByte; /*高八位*/
+  88   1              char idata ucLowByte; /*低八位*/
+  89   1      
+  90   1              uiHighByte = Single_ReadI2C(REG_Address)  ;
+  91   1              ucLowByte  = Single_ReadI2C(REG_Address+1);
+  92   1      
+  93   1              return ((uiHighByte << 8) + ucLowByte);   /*返回合成数据*/
+  94   1      }
+  95          
+  96          /***************************************************************
+  97          ** 作　  者: Songyimiao
+  98          ** 官    网：http://www.miaowlabs.com
+  99          ** 淘    宝：http://miaowlabs.taobao.com
+ 100          ** 日　  期: 2015年11月29日
+ 101          ** 函数名称: SampleInputVoltage
+ 102          ** 功能描述: MPU6050采样函数            
+ 103          ** 输　  入:   
+ 104          ** 输　  出:   
+ 105          ** 备    注: 
+ 106          ********************喵呜实验室版权所有**************************
+ 107          ***************************************************************/
+ 108          void SampleInputVoltage(void)
+ 109          {       
+ 110   1      
+ 111   1              g_iGyro_X_Axis   = DataSynthesis(GYRO_XOUT_H) ; //陀螺仪X轴
+ 112   1              g_iGyro_Y_Axis   = DataSynthesis(GYRO_YOUT_H) ; //陀螺仪Y轴
+ 113   1              g_iGyro_Z_Axis   = DataSynthesis(GYRO_ZOUT_H) ; //陀螺仪Z轴
+ 114   1          g_iAccel_X_Axis  = DataSynthesis(ACCEL_XOUT_H); //加速度X轴         
+ 115   1              g_iAccel_Y_Axis  = DataSynthesis(ACCEL_YOUT_H); //加速度Y轴
+ 116   1              g_iAccel_Z_Axis  = DataSynthesis(ACCEL_ZOUT_H); //加速度Z轴
+C51 COMPILER V9.00   CARSTAND                                                              07/06/2016 14:10:03 PAGE 3   
+
+ 117   1              //Send(g_iAccel_X_Axis,g_iAccel_Y_Axis,g_iAccel_Z_Axis,g_iGyro_X_Axis,g_iGyro_Y_Axis,g_iGyro_Z_Axis)    ;
+ 118   1      }
+ 119          
+ 120          /***************************************************************
+ 121          ** 作　  者: Songyimiao
+ 122          ** 官    网：http://www.miaowlabs.com
+ 123          ** 淘    宝：http://miaowlabs.taobao.com
+ 124          ** 日　  期: 2015年11月29日
+ 125          ** 函数名称: GyroRevise
+ 126          ** 功能描述: 陀螺仪校正函数            
+ 127          ** 输　  入:   
+ 128          ** 输　  出:   
+ 129          ** 备    注: 
+ 130          ********************喵呜实验室版权所有**************************
+ 131          ***************************************************************/
+ 132          void GetGyroRevise()
+ 133          {
+ 134   1              long int tempsumx,tempsumy,tempsumz;
+ 135   1              int temp;
+ 136   1              tempsumx=0;
+ 137   1              tempsumy=0;
+ 138   1              tempsumz=0;
+ 139   1              for(temp=0;temp<500;temp++)
+ 140   1              {
+ 141   2                      tempsumx += DataSynthesis(GYRO_XOUT_H) ;
+ 142   2                      tempsumy += DataSynthesis(GYRO_YOUT_H) ;
+ 143   2                      tempsumz += DataSynthesis(GYRO_ZOUT_H) ;
+ 144   2              }
+ 145   1              g_fGyroXOffset = tempsumx/500;
+ 146   1              g_fGyroYOffset = tempsumy/500;
+ 147   1              g_fGyroZOffset = tempsumz/500;
+ 148   1      }
+ 149          
+ 150          
+ 151          
+ 152          
+ 153          
+ 154          
+ 155          
+ 156          
+ 157          
+ 158          
+ 159          
+ 160          /***************************************************************
+ 161          ** 作　  者: Songyimiao
+ 162          ** 官    网：http://www.miaowlabs.com
+ 163          ** 淘    宝：http://miaowlabs.taobao.com
+ 164          ** 日　  期: 20160415
+ 165          ** 函数名称: BatteryChecker
+ 166          ** 功能描述: 电量检测（若电量不足，将亮起红灯）           
+ 167          ** 输　  入:   
+ 168          ** 输　  出:   
+ 169          ** 备    注: 
+ 170          ********************喵呜实验室版权所有**************************
+ 171          ***************************************************************/
+ 172          void BatteryChecker()
+ 173          {
+ 174   1      
+ 175   1              g_fPower = GetADCResult();                                      //参考电压5.02V 检测max4.2V min3.7V
+ 176   1      //      g_fPower = g_fPower / 206 * 4200;                       //3.7/5.02*256=188
+ 177   1              if(g_fPower <= 180)                                             
+ 178   1              {
+C51 COMPILER V9.00   CARSTAND                                                              07/06/2016 14:10:03 PAGE 4   
+
+ 179   2                      LED_RED=0;
+ 180   2              }
+ 181   1              else
+ 182   1              {
+ 183   2                      LED_RED=1;
+ 184   2              }
+ 185   1      
+ 186   1      }
+ 187          
+ 188          void TickSound(void)
+ 189          {
+ 190   1              PWMCKS=0x10;         
+ 191   1              T2L = 0xEB;     
+ 192   1              T2H = 0xFF;
+ 193   1              PWM(960,960,960,960);
+ 194   1              Delaynms(100); //校准完毕滴一声
+ 195   1          PWM(1000,1000,1000,1000);   
+ 196   1          PWMCKS=0x00;                        
+ 197   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    594    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =    118      15
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----       2
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,20 @@
+".\Output\i2c.obj",
+".\Output\imu.obj",
+".\Output\led.obj",
+".\Output\mpu6050.obj",
+".\Output\nrf24l0102.obj",
+".\Output\outputdata.obj",
+".\Output\adc.obj",
+".\Output\delay.obj",
+".\Output\EEPROM.obj",
+".\Output\gpio.obj",
+".\Output\iap.obj",
+".\Output\pwm.obj",
+".\Output\timer.obj",
+".\Output\uart.obj",
+".\Output\STARTUP.obj",
+".\Output\isr.obj",
+".\Output\main.obj",
+".\Output\func.obj" 
+TO ".\Output\Littlebuzz" 
+PRINT(".\Listing\Littlebuzz.m51") RAMSIZE(256) 

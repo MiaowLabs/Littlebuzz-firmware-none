@@ -14,8 +14,8 @@ MCU硬件相关
 *********************************************************************/
 
 /******Target CPU相关宏定义******/
-#define	DisableInterrupts	EA=0
-#define	EnableInterrupts	EA=1
+#define	DisableInterrupts()	EA=0
+#define	EnableInterrupts()	EA=1
 
 #define DEBUG_UART  1
 

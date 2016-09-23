@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   MAIN                                                                  07/23/2016 15:35:45 PAGE 1   
+C51 COMPILER V9.00   MAIN                                                                  09/11/2016 18:20:09 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
@@ -35,7 +35,7 @@ line level    source
   25          ***************************************************************/
   26          void main()
   27          {
-  28   1              DisableInterrupts;//Ω˚÷π◊‹÷–∂œ
+  28   1              DisableInterrupts();//Ω˚÷π◊‹÷–∂œ
   29   1              DriversInit();
   30   1              ADCInit();      
   31   1              MPU6050Init();
@@ -62,72 +62,93 @@ line level    source
   52   1              RxBuf[2]=128; //∏©—ˆ
   53   1              RxBuf[3]=128; //∫·πˆ
   54   1              RxBuf[4]=128;//yaw
-C51 COMPILER V9.00   MAIN                                                                  07/23/2016 15:35:45 PAGE 2   
+C51 COMPILER V9.00   MAIN                                                                  09/11/2016 18:20:09 PAGE 2   
 
   55   1      
   56   1              LED2=0; //Œ≤µ∆
-  57   1              TickSound();  //∆Ù∂ØœÏ…˘ ”√µΩT2
-  58   1                                      
-  59   1              EnableInterrupts;//‘ –Ì◊‹÷–∂œ    
-  60   1                                                                                
-  61   1              while(1)
-  62   1              {
-  63   2                STC_ISP();    //ISP œ¬‘ÿ≤ª”√¿‰∆Ù∂Ø                               
-  64   2              
-  65   2                Delay(500);
-  66   2                nRF24L01_RxPacket(RxBuf);
-  67   2                BatteryChecker();
-  68   2              if(RxBuf[5]==1)    //you
-  69   2                {
-  70   3                  DisableInterrupts;
-  71   3                      IAP_Angle();
-  72   3                      RxBuf[5]=0;
-  73   3                      TickSound();
-  74   3                      EnableInterrupts; 
-  75   3                }
-  76   2                if(RxBuf[6]==1)  //zuo
-  77   2                {
-  78   3                      DisableInterrupts;
-  79   3                      IAP_Gyro();
-  80   3                      RxBuf[6]=0;
-  81   3                      TickSound();
-  82   3                  EnableInterrupts;
-  83   3                }
-  84   2      
-  85   2                if(i>=10)
-  86   2              {
-  87   3                              i=0;
-  88   3                        if(RxBuf[8]==1)         //y
-  89   3                        {
-  90   4                              RxBuf[8]=0;
-  91   4                              g_fOffsety-=0.5;
-  92   4                      //      TickSound();
-  93   4                        }     
-  94   3                        if(RxBuf[10]==1)
-  95   3                        {
-  96   4                              RxBuf[10]=0;
-  97   4                              g_fOffsety+=0.5;
-  98   4                      //      TickSound();
-  99   4                        }     
- 100   3                        if(RxBuf[7]==1)         //x
- 101   3                        {
- 102   4                              RxBuf[7]=0;
- 103   4                              g_fOffsetx-=0.5;
- 104   4                      //      TickSound();
- 105   4                        }     
- 106   3                        if(RxBuf[9]==1)
- 107   3                        {
- 108   4                              RxBuf[9]=0;
- 109   4                              g_fOffsetx+=0.5;
- 110   4                      //      TickSound();
- 111   4                        }                             
- 112   3              }
- 113   2      
- 114   2                
- 115   2      #if 0//DEBUG_UART  //µ˜ ‘∆Ù”√ ‘§±‡“Î√¸¡Ó
-              
-C51 COMPILER V9.00   MAIN                                                                  07/23/2016 15:35:45 PAGE 3   
+  57   1              LED1=0; //Œ≤µ∆
+  58   1              TickSound();  //∆Ù∂ØœÏ…˘ ”√µΩT2
+  59   1                                      
+  60   1              EnableInterrupts();//‘ –Ì◊‹÷–∂œ  
+  61   1                                                                                
+  62   1              while(1)
+  63   1              {
+  64   2      /*              if(TxBuf[1]<=5) {
+  65   2                      unlock=1;
+  66   2                      LED0=0;
+  67   2                      LED2=0; //Œ≤µ∆
+  68   2                      LED1=0; //Œ≤µ∆
+  69   2                      LED3=0;
+  70   2                      }
+  71   2                      if (unlock == 1 ) EnableInterrupts();
+  72   2                      else if(unlock == 0 ) {
+  73   2                      LED0=0;
+  74   2                      LED2=0; //Œ≤µ∆
+  75   2                      LED1=0; //Œ≤µ∆
+  76   2                      LED3=0;
+  77   2                      Delaynms(200);
+  78   2                      LED0=1;
+  79   2                      LED2=1; //Œ≤µ∆
+  80   2                      LED1=1; //Œ≤µ∆
+  81   2                      LED3=1;
+  82   2                      Delaynms(200);
+  83   2                      }                                 */
+  84   2                STC_ISP();    //ISP œ¬‘ÿ≤ª”√¿‰∆Ù∂Ø                               
+  85   2                Delay(500);
+  86   2                nRF24L01_RxPacket(RxBuf);
+  87   2                BatteryChecker();
+  88   2               
+  89   2              if(RxBuf[5]==1)    //you
+  90   2                {
+  91   3                  DisableInterrupts();
+  92   3                      IAP_Angle();
+  93   3                      RxBuf[5]=0;
+  94   3                      TickSound();
+  95   3                      EnableInterrupts(); 
+  96   3                }
+  97   2                if(RxBuf[6]==1)  //zuo
+  98   2                {
+  99   3                      DisableInterrupts();
+ 100   3                      IAP_Gyro();
+ 101   3                      RxBuf[6]=0;
+ 102   3                      TickSound();
+ 103   3                  EnableInterrupts();
+ 104   3                }
+ 105   2      
+ 106   2                if(i>=10)
+ 107   2              {
+ 108   3                              i=0;
+ 109   3                        if(RxBuf[8]==1)         //y
+ 110   3                        {
+ 111   4                              RxBuf[8]=0;
+ 112   4                              g_fOffsety-=1;
+ 113   4                      //      TickSound();
+ 114   4                        }     
+ 115   3                        if(RxBuf[10]==1)
+ 116   3                        {
+C51 COMPILER V9.00   MAIN                                                                  09/11/2016 18:20:09 PAGE 3   
 
+ 117   4                              RxBuf[10]=0;
+ 118   4                              g_fOffsety+=1;
+ 119   4                      //      TickSound();
+ 120   4                        }     
+ 121   3                        if(RxBuf[7]==1)         //x
+ 122   3                        {
+ 123   4                              RxBuf[7]=0;
+ 124   4                              g_fOffsetx-=1;
+ 125   4                      //      TickSound();
+ 126   4                        }     
+ 127   3                        if(RxBuf[9]==1)
+ 128   3                        {
+ 129   4                              RxBuf[9]=0;
+ 130   4                              g_fOffsetx+=1;
+ 131   4                      //      TickSound();
+ 132   4                        }                             
+ 133   3              }
+ 134   2      
+ 135   2                
+ 136   2      #if 0//DEBUG_UART  //µ˜ ‘∆Ù”√ ‘§±‡“Î√¸¡Ó
+              
                       OutData[0] = 45;
                       OutData[1] = 90;  
                       OutData[2] = g_fPower ;
@@ -136,13 +157,13 @@ line level    source
                       OutPut_Data();          
                                 
               #endif                  
- 125   2                                              
- 126   2              }
- 127   1      }
+ 146   2                                              
+ 147   2              }
+ 148   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    337    ----
+   CODE SIZE        =    247    ----
    CONSTANT SIZE    =   ----    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----

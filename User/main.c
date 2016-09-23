@@ -25,7 +25,7 @@
 ***************************************************************/
 void main()
 {
-	DisableInterrupts;//禁止总中断
+	DisableInterrupts();//禁止总中断
 	DriversInit();
 	ADCInit();	
 	MPU6050Init();
@@ -54,32 +54,53 @@ void main()
 	RxBuf[4]=128;//yaw
 
 	LED2=0;	//尾灯
+	LED1=0;	//尾灯
 	TickSound();  //启动响声 用到T2
 				
-	EnableInterrupts;//允许总中断	 
+	EnableInterrupts();//允许总中断	 
 									  
 	while(1)
 	{
+/*		if(TxBuf[1]<=5) {
+		unlock=1;
+		LED0=0;
+		LED2=0;	//尾灯
+		LED1=0;	//尾灯
+		LED3=0;
+		}
+		if (unlock == 1 ) EnableInterrupts();
+		else if(unlock == 0 ) {
+		LED0=0;
+		LED2=0;	//尾灯
+		LED1=0;	//尾灯
+		LED3=0;
+		Delaynms(200);
+		LED0=1;
+		LED2=1;	//尾灯
+		LED1=1;	//尾灯
+		LED3=1;
+		Delaynms(200);
+		}				  */
 	  STC_ISP();	//ISP 下载不用冷启动 				   
-	
 	  Delay(500);
 	  nRF24L01_RxPacket(RxBuf);
 	  BatteryChecker();
+	 
 	if(RxBuf[5]==1)	   //you
 	  {
-	    DisableInterrupts;
+	    DisableInterrupts();
 		IAP_Angle();
 		RxBuf[5]=0;
 		TickSound();
-		EnableInterrupts; 
+		EnableInterrupts(); 
 	  }
 	  if(RxBuf[6]==1)  //zuo
 	  {
-	  	DisableInterrupts;
+	  	DisableInterrupts();
 		IAP_Gyro();
 		RxBuf[6]=0;
 		TickSound();
-	    EnableInterrupts;
+	    EnableInterrupts();
 	  }
 
 	  if(i>=10)
@@ -88,25 +109,25 @@ void main()
 		  if(RxBuf[8]==1)	  //y
 		  {
 		  	RxBuf[8]=0;
-		  	g_fOffsety-=0.5;
+		  	g_fOffsety-=1;
 		//	TickSound();
 		  }	
 		  if(RxBuf[10]==1)
 		  {
 		  	RxBuf[10]=0;
-		  	g_fOffsety+=0.5;
+		  	g_fOffsety+=1;
 		//	TickSound();
 		  }	
 		  if(RxBuf[7]==1)	  //x
 		  {
 		  	RxBuf[7]=0;
-		  	g_fOffsetx-=0.5;
+		  	g_fOffsetx-=1;
 		//	TickSound();
 		  }	
 		  if(RxBuf[9]==1)
 		  {
 		  	RxBuf[9]=0;
-		  	g_fOffsetx+=0.5;
+		  	g_fOffsetx+=1;
 		//	TickSound();
 		  }				
 	}

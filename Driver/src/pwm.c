@@ -26,11 +26,11 @@ void PWMInit()
 	PWM2T1 = 1000;                 //设置PWM3第1次反转的PWM计数
     PWM2T2 = 1001;    			 	//设置PWM3第2次反转的PWM计数
 									//占空比为(PWM3T2-PWM3T1)/PWMC
-									//初始PWM3占空比为100%
+									//初始PWM3占空比为0%
 	PWM3T1 = 1000;                 //设置PWM3第1次反转的PWM计数
     PWM3T2 = 1001;    			 	//设置PWM3第2次反转的PWM计数
 									//占空比为(PWM3T2-PWM3T1)/PWMC
-									//初始PWM3占空比为100%
+									//初始PWM3占空比为0%
 
 	PWM4T1 = 1000;                 //设置PWM4第1次反转的PWM计数
     PWM4T2 = 1001;    				//设置PWM4第2次反转的PWM计数

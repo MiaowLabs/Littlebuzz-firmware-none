@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   NRF24L0102                                                            07/23/2016 15:35:43 PAGE 1   
+C51 COMPILER V9.00   NRF24L0102                                                            09/11/2016 18:20:08 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE NRF24L0102
@@ -62,7 +62,7 @@ line level    source
   52   1          //SPI_RW_Reg(WRITE_REG + EN_RXADDR, 0x01);    //接收要使能接收通道0
   53   1      
   54   1              SPI_RW_Reg(WRITE_REG + RF_CH, 0);        //   设置信道工作为2.4GHZ，收发必须一致
-C51 COMPILER V9.00   NRF24L0102                                                            07/23/2016 15:35:43 PAGE 2   
+C51 COMPILER V9.00   NRF24L0102                                                            09/11/2016 18:20:08 PAGE 2   
 
   55   1              SPI_RW_Reg(WRITE_REG + RX_PW_P0, RX_PLOAD_WIDTH); //设置接收数据长度，本次设置为32字节
   56   1              SPI_RW_Reg(WRITE_REG + RF_SETUP, 0x07);                 //设置发射速率为1MB/S，发射功率为最大值+7dB，由于有X2401L功放
@@ -126,7 +126,7 @@ line level    source
  113          uint SPI_Read_Buf(uchar reg, uchar *pBuf, uchar uchars)
  114          {
  115   1              uint status,uchar_ctr;
-C51 COMPILER V9.00   NRF24L0102                                                            07/23/2016 15:35:43 PAGE 3   
+C51 COMPILER V9.00   NRF24L0102                                                            09/11/2016 18:20:08 PAGE 3   
 
  116   1              
  117   1              CSN = 0;                                // Set CSN low, init SPI tranaction
@@ -190,7 +190,7 @@ line level    source
  173          /*********************************************************************************************************
              -**
  174          /*函数：void nRF24L01_TxPacket(unsigned char * tx_buf)
-C51 COMPILER V9.00   NRF24L0102                                                            07/23/2016 15:35:43 PAGE 4   
+C51 COMPILER V9.00   NRF24L0102                                                            09/11/2016 18:20:08 PAGE 4   
 
  175          /*功能：发送 tx_buf中数据
  176          /*********************************************************************************************************

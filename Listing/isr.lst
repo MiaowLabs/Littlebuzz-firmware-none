@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   ISR                                                                   07/23/2016 15:35:45 PAGE 1   
+C51 COMPILER V9.00   ISR                                                                   09/11/2016 18:20:09 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE ISR
@@ -32,102 +32,107 @@ line level    source
   22          ***************************************************************/
   23          void Timer1_Update(void) interrupt  3           //100hz
   24          {  
-  25   1              i++;
-  26   1      
-  27   1              g_Throttle=(float)(255 - RxBuf[1]);     //ÓÍÃÅ  RxBuf[1]:0-255
-  28   1      
-  29   1              if(g_Throttle>80)//Èç¹ûÓÍÃÅ´óÓÚ80 ¼´ÒÑÆð·É
-  30   1              {
-  31   2                      if(RxBuf[0]==g_LastCountRunAway)//Èç¹ûRxBuf[0]µÄÊý¾ÝÃ»ÓÐÊÕµ½ ¼´Ê¸Áª
-  32   2                      {
-  33   3                              g_CountRunAway++;  //×´Ì¬±êÊ¶+1
-  34   3                              if(g_CountRunAway>128){g_CountRunAway=128;}  //×´Ì¬±êÊ¶´óÓÚ128¼´1ÃëÃ»ÓÐÊÕµ½Êý¾Ý£¬Ê§¿Ø±£»¤
-  35   3                      }
-  36   2                      else{g_CountRunAway=0;}
-  37   2              }
-  38   1              else{g_CountRunAway=0;} //ÊÕµ½ÐÅºÅÍË³öÊ§¿Ø±£»¤
-  39   1              if(g_CountRunAway==128){g_Throttle=101;RxBuf[1]=128;RxBuf[2]=128;} //´¥·¢Ê§¿Ø±£»¤ ÓÍÃÅÎª1°ëÉÙÒ»µã£¬»ºÂýÏÂ
-             -½µ£¬¸©Ñöºá¹ö·½Ïò¶æ¹éÖÐ
-  40   1      
-  41   1              
-  42   1              g_LastCountRunAway=RxBuf[0];
-  43   1              SampleInputVoltage();
-  44   1      
-  45   1              Angle_ax=(float)g_iAccel_X_Axis/8192;  //¼ÓËÙ¶È´¦Àí
-  46   1              Angle_ay=(float)g_iAccel_Y_Axis/8192;  //×ª»»¹ØÏµ8192LSB/g
-  47   1              Angle_az=(float)g_iAccel_Z_Axis/8192;  //¼ÓËÙ¶ÈÁ¿³Ì +-4g/S
-  48   1              Angle_gx -= g_fGyroXOffset;
-  49   1              Angle_gy -= g_fGyroYOffset;
-  50   1              Angle_gz -= g_fGyroZOffset;
-  51   1              Angle_gx=(float)g_iGyro_X_Axis/65.5;   //ÍÓÂÝÒÇ´¦Àí
-  52   1              Angle_gy=(float)g_iGyro_Y_Axis/65.5;   //ÍÓÂÝÒÇÁ¿³Ì 
-  53   1              Angle_gz=(float)g_iGyro_Z_Axis/65.5;   //×ª»»¹ØÏµ65.5LSB/¶È
-C51 COMPILER V9.00   ISR                                                                   07/23/2016 15:35:45 PAGE 2   
+  25   1      //      short tst16 = g_iAccel_X_Axis;
+  26   1              i++;
+  27   1      
+  28   1              g_Throttle=(float)(255 - RxBuf[1]);     //ÓÍÃÅ  RxBuf[1]:0-255
+  29   1      
+  30   1              if(g_Throttle>20)//Èç¹ûÓÍÃÅ´óÓÚ80 ¼´ÒÑÆð·É
+  31   1              {
+  32   2                      if(RxBuf[0]==g_LastCountRunAway)//Èç¹ûRxBuf[0]µÄÊý¾ÝÃ»ÓÐÊÕµ½ ¼´Ê¸Áª
+  33   2                      {
+  34   3                              g_CountRunAway++;  //×´Ì¬±êÊ¶+1
+  35   3                              if(g_CountRunAway>128){g_CountRunAway=128;}  //×´Ì¬±êÊ¶´óÓÚ128¼´1ÃëÃ»ÓÐÊÕµ½Êý¾Ý£¬Ê§¿Ø±£»¤
+  36   3                      }
+  37   2                      else{g_CountRunAway=0;}
+  38   2              }
+  39   1              else{g_CountRunAway=0;} //ÊÕµ½ÐÅºÅÍË³öÊ§¿Ø±£»¤
+  40   1              if(g_CountRunAway==128){g_Throttle=30;RxBuf[1]=128;RxBuf[2]=128;} //´¥·¢Ê§¿Ø±£»¤ ÓÍÃÅÎª1°ëÉÙÒ»µã£¬»ºÂýÏÂ½
+             -µ£¬¸©Ñöºá¹ö·½Ïò¶æ¹éÖÐ
+  41   1      
+  42   1              
+  43   1              g_LastCountRunAway=RxBuf[0];
+  44   1              SampleInputVoltage();
+  45   1      
+  46   1              Angle_ax=(float)g_iAccel_X_Axis/8192;  //¼ÓËÙ¶È´¦Àí
+  47   1              Angle_ay=(float)g_iAccel_Y_Axis/8192;  //×ª»»¹ØÏµ8192LSB/g
+  48   1              Angle_az=(float)g_iAccel_Z_Axis/8192;  //¼ÓËÙ¶ÈÁ¿³Ì +-4g/S
+  49   1              Angle_gx -= g_fGyroXOffset;
+  50   1              Angle_gy -= g_fGyroYOffset;
+  51   1              Angle_gz -= g_fGyroZOffset;
+  52   1              Angle_gx=(float)g_iGyro_X_Axis/65.5;   //ÍÓÂÝÒÇ´¦Àí
+  53   1              Angle_gy=(float)g_iGyro_Y_Axis/65.5;   //ÍÓÂÝÒÇÁ¿³Ì 
+C51 COMPILER V9.00   ISR                                                                   09/11/2016 18:20:09 PAGE 2   
 
-  54   1              
-  55   1      //***********************************ËÄÔªÊý***********************************
-  56   1              IMUupdate(Angle_gx*0.0174533,Angle_gy*0.0174533,Angle_gz*0.0174533,Angle_ax*0.0174533,Angle_ay*0.0174533,
+  54   1              Angle_gz=(float)g_iGyro_Z_Axis/65.5;   //×ª»»¹ØÏµ65.5LSB/¶È
+  55   1              
+  56   1      //***********************************ËÄÔªÊý***********************************
+  57   1              IMUupdate(Angle_gx*0.0174533,Angle_gy*0.0174533,Angle_gz*0.0174533,Angle_ax*0.0174533,Angle_ay*0.0174533,
              -Angle_az*0.0174533);
-  57   1              //*0.0174533ÎªPI/180 Ä¿µÄÊÇ½«½Ç¶È×ª»¡¶È
-  58   1      
-  59   1              if(123<TxBuf[2]<133)
-  60   1              {
-  61   2              TxBuf[2]=128;
-  62   2              }
-  63   1              if(123<TxBuf[3]<133)
-  64   1              {
-  65   2              TxBuf[3]=128;
-  66   2              }
-  67   1              if(113<TxBuf[4]<143)
-  68   1              {
-  69   2              TxBuf[4]=128;
-  70   2              }
-  71   1      
-  72   1              AttitudeControl();
-  73   1                                                                
-  74   1              if(g_Throttle>=10)
-  75   1              {PWM(PWM3,PWM2,PWM1,PWM4);}      //Èë¿Ú2345-   PWM3/PWM2/PWM1/PWM4
-  76   1              else 
-  77   1              {PWM(1000,1000,1000,1000);}       
-  78   1              
-  79   1              //UART1SendByte(0x78)   ;                                                         
-  80   1      #if 0//DEBUG_UART  //µ÷ÊÔÆôÓÃ Ô¤±àÒëÃüÁî
+  58   1              //*0.0174533ÎªPI/180 Ä¿µÄÊÇ½«½Ç¶È×ª»¡¶È
+  59   1      
+  60   1              if(123<TxBuf[2]<133)
+  61   1              {
+  62   2              TxBuf[2]=128;
+  63   2              }
+  64   1              if(123<TxBuf[3]<133)
+  65   1              {
+  66   2              TxBuf[3]=128;
+  67   2              }
+  68   1              if(113<TxBuf[4]<143)
+  69   1              {
+  70   2              TxBuf[4]=128;
+  71   2              }
+  72   1      
+  73   1              AttitudeControl();
+  74   1                                                                
+  75   1              if(g_Throttle>=20)
+  76   1              {PWM(PWM3,PWM2,PWM1,PWM4);}      //Èë¿Ú2345-   PWM3/PWM2/PWM1/PWM4
+  77   1              else 
+  78   1              {PWM(1000,1000,1000,1000);}       
+  79   1              
+  80   1      /*      
+  81   1              UART1SendByte(0x9c);
+  82   1              UART1SendByte(0x00);
+  83   1              UART1SendByte(tst16&0xf);
+  84   1              UART1SendByte(tst16>>8);*/                                                        
+  85   1      #if 0//DEBUG_UART  //µ÷ÊÔÆôÓÃ Ô¤±àÒëÃüÁî
               
-              //      OutData[0] = Angle_gx;
-              //      OutData[1] = Angle_gy;
-              //      OutData[2] = pitch;//¶ÔÓ¦Angle_gy
-              //      OutData[3] = roll; //¶ÔÓ¦Angle_gx 
-                      OutData[0] = g_fOffsetx;
-                      OutData[1] = g_fOffsety;        
-                      OutData[2] = g_fPower;
-                      OutData[3] = yaw; 
+                      OutData[0] = Angle_gx;
+                      OutData[1] = Angle_gy;
+                      OutData[2] = pitch;//¶ÔÓ¦Angle_gy
+                      OutData[3] = roll; //¶ÔÓ¦Angle_gx ¶ÔÓ¦Ó²¼þYÖá  
+              //      OutData[0] = g_fOffsetx;
+               //     OutData[1] = g_fOffsety;        
+              //      OutData[2] = g_fPower;
+              //      OutData[3] = yaw; 
                       OutPut_Data();          
                                         
               #endif                  
-  93   1              
-  94   1                      g_ucLEDCount++;
-  95   1                      if(g_ucLEDCount >=125) //LED1µÆ1Ãë½»ÌæÉÁË¸
-  96   1                      {
-  97   2                              g_ucLEDCount=0;
-  98   2                              LED_GREEN = ~LED_GREEN;
-  99   2                      }
- 100   1                               
- 101   1      }
- 102          
- 103          
- 104                                           
+  98   1              
+  99   1                      g_ucLEDCount++;
+ 100   1                      if(g_ucLEDCount >=125) //LED1µÆ1Ãë½»ÌæÉÁË¸
+ 101   1                      {
+ 102   2                              g_ucLEDCount=0;
+ 103   2                              LED_GREEN = ~LED_GREEN;
+ 104   2                      }
+ 105   1                               
+ 106   1      }
+ 107          
+ 108          
+ 109                                           
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
    CODE SIZE        =    990    ----
    CONSTANT SIZE    =   ----    ----
+C51 COMPILER V9.00   ISR                                                                   09/11/2016 18:20:09 PAGE 3   
+
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
-C51 COMPILER V9.00   ISR                                                                   07/23/2016 15:35:45 PAGE 3   
-
 END OF MODULE INFORMATION.
 
 

@@ -9,6 +9,7 @@ float g_Throttle; //油门
 char th;
 float code g_Th[3]={4,3.5,4};		//分段油门
 int PWM1=0,PWM2=0,PWM3=0,PWM4=0;
+unsigned char unlock=0;
 
 int g_LastCountRunAway,g_CountRunAway;
 int MotorOut1,MotorOut2,MotorOut3,MotorOut4;
@@ -17,7 +18,7 @@ double Angle_ax, Angle_ay, Angle_az;
 double Angle_gx, Angle_gy, Angle_gz;
 unsigned char g_fPower;
 int g_fGyroXOffset,g_fGyroYOffset,g_fGyroZOffset;
-float g_fOffsetx=0,g_fOffsety=0;
+char g_fOffsetx=0,g_fOffsety=0;
 unsigned int xdata g_uiStartCount;
 unsigned char xdata g_ucLEDCount;
 int i;
@@ -55,20 +56,20 @@ float Out_PID_Y,g_fYAngleError_In,g_fYAngleErrorIntegral_IN;
 float g_fXAngleErrorIntegral,g_fYAngleErrorIntegral;
 int g_x,g_y,g_z;
 
-float code g_fcXAngle_P_Out=6.0; //
-float code g_fcXAngle_I_Out=0.01; //
-float code g_fcXAngle_P_In=1.0; //	  max1.2
-float code g_fcXAngle_I_In=0.01; //
-float code g_fcXAngle_D_In=4.5; //	  max9
+float code g_fcXAngle_P_Out=5.0; //6
+float code g_fcXAngle_I_Out=0.01; //0.01
+float code g_fcXAngle_P_In=0.6; //	  max1.2	 1
+float code g_fcXAngle_I_In=0.01; //			  0.01
+float code g_fcXAngle_D_In=2.0; //	  max9	 4.5
 
-float code g_fcYAngle_P_Out=6.0; //
+float code g_fcYAngle_P_Out=5.0; //
 float code g_fcYAngle_I_Out=0.01; //
-float code g_fcYAngle_P_In=1.0; //
+float code g_fcYAngle_P_In=0.6; //max 0.6
 float code g_fcYAngle_I_In=0.01; //
-float code g_fcYAngle_D_In=4.5; //
+float code g_fcYAngle_D_In=2.0; //max 5
 
-float code g_fcZAngle_P=5.0;//3
-float code g_fcZAngle_D=4.0; //3
+float code g_fcZAngle_P=5.0;//5
+float code g_fcZAngle_D=4.0; //4
 float Anglezlate;
 float g_fYAngleErrorIntegral_IN;
 float gyro_y_Last,gyro_x_Last,gyro_z_Last;   //储存上一次角速度数据
@@ -293,16 +294,7 @@ void AttitudeControl()
   	if(g_fXAngleCtrOut>  1000) {g_fXAngleCtrOut =  1000; }  //输出量限幅
 	if(g_fXAngleCtrOut<(-1000)){g_fXAngleCtrOut =(-1000);}
 	
-	MotorOut2= (int)(g_Throttle * 4 - g_fXAngleCtrOut + g_fZAngleCtrOut );	//255*4=1020
-	MotorOut4= (int)(g_Throttle * 4 + g_fXAngleCtrOut + g_fZAngleCtrOut); 
-
-	PWM2 = (1000 - MotorOut2 );	   
-	if(PWM2>1000){PWM2=1000;}
-	else if(PWM2<0){PWM2=0;}
 	
-	PWM4 = (1000 - MotorOut4 );
-	if(PWM4>1000){PWM4=1000;}
-	else if(PWM4<0){PWM4=0;}
 
 		
   	
@@ -341,10 +333,15 @@ void AttitudeControl()
 	
     if(g_fYAngleCtrOut>1000){g_fYAngleCtrOut=1000;}  //输出量限幅
 	if(g_fYAngleCtrOut<-1000){g_fYAngleCtrOut=-1000;}
-	
-	MotorOut1= (int)g_Throttle * 4 - g_fYAngleCtrOut - g_fZAngleCtrOut;
-	MotorOut3= (int)g_Throttle * 4 + g_fYAngleCtrOut - g_fZAngleCtrOut;
 
+	MotorOut2= (int)(g_Throttle * 4 + g_fYAngleCtrOut - g_fXAngleCtrOut+ g_fZAngleCtrOut );	//255*4=1020
+	MotorOut4= (int)(g_Throttle * 4 - g_fYAngleCtrOut + g_fXAngleCtrOut+ g_fZAngleCtrOut ); 		
+	MotorOut1= (int)(g_Throttle * 4 - g_fYAngleCtrOut - g_fXAngleCtrOut- g_fZAngleCtrOut );
+	MotorOut3= (int)(g_Throttle * 4 + g_fYAngleCtrOut + g_fXAngleCtrOut- g_fZAngleCtrOut );
+//	MotorOut2= (int)(g_Throttle * 4 + g_fYAngleCtrOut );	//255*4=1020
+//	MotorOut4= (int)(g_Throttle * 4 - g_fYAngleCtrOut ); 		
+//	MotorOut1= (int)(g_Throttle * 4 - g_fYAngleCtrOut );
+//	MotorOut3= (int)(g_Throttle * 4 + g_fYAngleCtrOut );
 	PWM1=(1000 - MotorOut1 );	  
 	if(PWM1>1000){PWM1=1000;}
 	else if(PWM1<0){PWM1=0;}
@@ -352,4 +349,12 @@ void AttitudeControl()
 	PWM3=(1000 - MotorOut3 );
 	if(PWM3>1000){PWM3=1000;}
 	else if(PWM3<0){PWM3=0;}
+
+	PWM2 = (1000 - MotorOut2 );	   
+	if(PWM2>1000){PWM2=1000;}
+	else if(PWM2<0){PWM2=0;}
+	
+	PWM4 = (1000 - MotorOut4 );
+	if(PWM4>1000){PWM4=1000;}
+	else if(PWM4<0){PWM4=0;}
 }

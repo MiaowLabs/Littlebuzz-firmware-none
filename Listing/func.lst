@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   FUNC                                                                  07/23/2016 15:35:45 PAGE 1   
+C51 COMPILER V9.00   FUNC                                                                  09/11/2016 18:20:09 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE FUNC
@@ -19,371 +19,376 @@ line level    source
    9          char th;
   10          float code g_Th[3]={4,3.5,4};           //分段油门
   11          int PWM1=0,PWM2=0,PWM3=0,PWM4=0;
-  12          
-  13          int g_LastCountRunAway,g_CountRunAway;
-  14          int MotorOut1,MotorOut2,MotorOut3,MotorOut4;
-  15          double pitch, yaw, roll;
-  16          double Angle_ax, Angle_ay, Angle_az;
-  17          double Angle_gx, Angle_gy, Angle_gz;
-  18          unsigned char g_fPower;
-  19          int g_fGyroXOffset,g_fGyroYOffset,g_fGyroZOffset;
-  20          float g_fOffsetx=0,g_fOffsety=0;
-  21          unsigned int xdata g_uiStartCount;
-  22          unsigned char xdata g_ucLEDCount;
-  23          int i;
-  24          /******角度控制参数******/
-  25          int   g_iAccel_X_Axis,g_iAccel_Y_Axis,g_iAccel_Z_Axis ; //加速度X轴数据
-  26          int   g_iGyro_X_Axis,g_iGyro_Y_Axis,g_iGyro_Z_Axis  ;   //陀螺仪Y轴数据
-  27          
-  28          long int  g_liAccSum;
-  29          long int  g_liGyroSum;
-  30          float g_fCarAngle;                              //车模倾角
-  31          float g_fGyroAngleSpeed;                        //角速度                        
-  32          float g_fGyroscopeAngleIntegral;        //角速度积分值
-  33          float g_fGravityAngle;                          //加速度初步计算得到的倾角
-  34          int g_iGyroOffset;
-  35          /******速度控制参数******/
-  36          int   g_iLeftMotorPulse;
-  37          int   g_iRightMotorPulse;
-  38          int   g_iLeftMotorPulseSigma;
-  39          int   g_iRightMotorPulseSigma;
-  40          float g_fCarSpeed;
-  41          float g_fCarSpeedOld;
-  42          float g_fCarPosition;
-  43          unsigned char g_ucSpeedControlPeriod ;
-  44          unsigned char g_ucSpeedControlCount ;
-  45          
-  46          float g_fXAngleRemote,g_fYAngleRemote,g_fZAngleRemote;
-  47          float g_fXAngleCtrOut,g_fYAngleCtrOut,g_fZAngleCtrOut;
-  48          float g_fXAngleError,g_fYAngleError;
-  49          float g_fXP,g_fXI,g_fXD;
-  50          float g_fYP,g_fYI,g_fYD;                                                         
-  51          float g_fXDeriv,g_fXDeltaOld,g_fYDeriv,g_fYDeltaOld;
-  52          float Angle_Rx,Angle_Ry,Angle_gy_R;
-  53          float Out_PID_X,g_fXAngleError_In,g_fXAngleErrorIntegral_IN;
-  54          float Out_PID_Y,g_fYAngleError_In,g_fYAngleErrorIntegral_IN;
-C51 COMPILER V9.00   FUNC                                                                  07/23/2016 15:35:45 PAGE 2   
+  12          unsigned char unlock=0;
+  13          
+  14          int g_LastCountRunAway,g_CountRunAway;
+  15          int MotorOut1,MotorOut2,MotorOut3,MotorOut4;
+  16          double pitch, yaw, roll;
+  17          double Angle_ax, Angle_ay, Angle_az;
+  18          double Angle_gx, Angle_gy, Angle_gz;
+  19          unsigned char g_fPower;
+  20          int g_fGyroXOffset,g_fGyroYOffset,g_fGyroZOffset;
+  21          char g_fOffsetx=0,g_fOffsety=0;
+  22          unsigned int xdata g_uiStartCount;
+  23          unsigned char xdata g_ucLEDCount;
+  24          int i;
+  25          /******角度控制参数******/
+  26          int   g_iAccel_X_Axis,g_iAccel_Y_Axis,g_iAccel_Z_Axis ; //加速度X轴数据
+  27          int   g_iGyro_X_Axis,g_iGyro_Y_Axis,g_iGyro_Z_Axis  ;   //陀螺仪Y轴数据
+  28          
+  29          long int  g_liAccSum;
+  30          long int  g_liGyroSum;
+  31          float g_fCarAngle;                              //车模倾角
+  32          float g_fGyroAngleSpeed;                        //角速度                        
+  33          float g_fGyroscopeAngleIntegral;        //角速度积分值
+  34          float g_fGravityAngle;                          //加速度初步计算得到的倾角
+  35          int g_iGyroOffset;
+  36          /******速度控制参数******/
+  37          int   g_iLeftMotorPulse;
+  38          int   g_iRightMotorPulse;
+  39          int   g_iLeftMotorPulseSigma;
+  40          int   g_iRightMotorPulseSigma;
+  41          float g_fCarSpeed;
+  42          float g_fCarSpeedOld;
+  43          float g_fCarPosition;
+  44          unsigned char g_ucSpeedControlPeriod ;
+  45          unsigned char g_ucSpeedControlCount ;
+  46          
+  47          float g_fXAngleRemote,g_fYAngleRemote,g_fZAngleRemote;
+  48          float g_fXAngleCtrOut,g_fYAngleCtrOut,g_fZAngleCtrOut;
+  49          float g_fXAngleError,g_fYAngleError;
+  50          float g_fXP,g_fXI,g_fXD;
+  51          float g_fYP,g_fYI,g_fYD;                                                         
+  52          float g_fXDeriv,g_fXDeltaOld,g_fYDeriv,g_fYDeltaOld;
+  53          float Angle_Rx,Angle_Ry,Angle_gy_R;
+  54          float Out_PID_X,g_fXAngleError_In,g_fXAngleErrorIntegral_IN;
+C51 COMPILER V9.00   FUNC                                                                  09/11/2016 18:20:09 PAGE 2   
 
-  55          float g_fXAngleErrorIntegral,g_fYAngleErrorIntegral;
-  56          int g_x,g_y,g_z;
-  57          
-  58          float code g_fcXAngle_P_Out=6.0; //
-  59          float code g_fcXAngle_I_Out=0.01; //
-  60          float code g_fcXAngle_P_In=1.0; //        max1.2
-  61          float code g_fcXAngle_I_In=0.01; //
-  62          float code g_fcXAngle_D_In=4.5; //        max9
-  63          
-  64          float code g_fcYAngle_P_Out=6.0; //
-  65          float code g_fcYAngle_I_Out=0.01; //
-  66          float code g_fcYAngle_P_In=1.0; //
-  67          float code g_fcYAngle_I_In=0.01; //
-  68          float code g_fcYAngle_D_In=4.5; //
-  69          
-  70          float code g_fcZAngle_P=5.0;//3
-  71          float code g_fcZAngle_D=4.0; //3
-  72          float Anglezlate;
-  73          float g_fYAngleErrorIntegral_IN;
-  74          float gyro_y_Last,gyro_x_Last,gyro_z_Last;   //储存上一次角速度数据
-  75          unsigned char g_COMThrottle;
-  76                     
-  77          /******蓝牙控制参数******/
-  78          float xdata g_fBluetoothSpeed;
-  79          float xdata g_fBluetoothDirection;
-  80          
-  81          /***************************************************************
-  82          ** 作　  者: Songyimiao
-  83          ** 官    网：http://www.miaowlabs.com
-  84          ** 淘    宝：http://miaowlabs.taobao.com
-  85          ** 日　  期: 2015年11月29日
-  86          ** 函数名称: DriversInit
-  87          ** 功能描述: 底层驱动初始化            
-  88          ** 输　  入:   
-  89          ** 输　  出:   
-  90          ** 备    注: 
-  91          ********************喵呜实验室版权所有**************************
-  92          ***************************************************************/
-  93          void DriversInit(void)
-  94          {
-  95   1      
-  96   1              GPIOInit();
-  97   1              Timer1Init();
-  98   1              PWMInit();
-  99   1              Uart1Init();
- 100   1      
- 101   1      }
- 102          
- 103          void ParametersInit()
- 104          {
- 105   1              g_fPower = 0;
- 106   1              g_fGyroXOffset=g_fGyroYOffset=g_fGyroZOffset=0; 
- 107   1      }
- 108          
- 109          /***************************************************************
- 110          ** 作　  者: Songyimiao
- 111          ** 官    网：http://www.miaowlabs.com
- 112          ** 淘    宝：http://miaowlabs.taobao.com
- 113          ** 日　  期: 2015年11月29日
- 114          ** 函数名称: DataSynthesis
- 115          ** 功能描述: 数据合成函数            
- 116          ** 输　  入:   
-C51 COMPILER V9.00   FUNC                                                                  07/23/2016 15:35:45 PAGE 3   
+  55          float Out_PID_Y,g_fYAngleError_In,g_fYAngleErrorIntegral_IN;
+  56          float g_fXAngleErrorIntegral,g_fYAngleErrorIntegral;
+  57          int g_x,g_y,g_z;
+  58          
+  59          float code g_fcXAngle_P_Out=5.0; //6
+  60          float code g_fcXAngle_I_Out=0.01; //0.01
+  61          float code g_fcXAngle_P_In=0.6; //        max1.2         1
+  62          float code g_fcXAngle_I_In=0.01; //                       0.01
+  63          float code g_fcXAngle_D_In=2.0; //        max9   4.5
+  64          
+  65          float code g_fcYAngle_P_Out=5.0; //
+  66          float code g_fcYAngle_I_Out=0.01; //
+  67          float code g_fcYAngle_P_In=0.6; //max 0.6
+  68          float code g_fcYAngle_I_In=0.01; //
+  69          float code g_fcYAngle_D_In=2.0; //max 5
+  70          
+  71          float code g_fcZAngle_P=5.0;//5
+  72          float code g_fcZAngle_D=4.0; //4
+  73          float Anglezlate;
+  74          float g_fYAngleErrorIntegral_IN;
+  75          float gyro_y_Last,gyro_x_Last,gyro_z_Last;   //储存上一次角速度数据
+  76          unsigned char g_COMThrottle;
+  77                     
+  78          /******蓝牙控制参数******/
+  79          float xdata g_fBluetoothSpeed;
+  80          float xdata g_fBluetoothDirection;
+  81          
+  82          /***************************************************************
+  83          ** 作　  者: Songyimiao
+  84          ** 官    网：http://www.miaowlabs.com
+  85          ** 淘    宝：http://miaowlabs.taobao.com
+  86          ** 日　  期: 2015年11月29日
+  87          ** 函数名称: DriversInit
+  88          ** 功能描述: 底层驱动初始化            
+  89          ** 输　  入:   
+  90          ** 输　  出:   
+  91          ** 备    注: 
+  92          ********************喵呜实验室版权所有**************************
+  93          ***************************************************************/
+  94          void DriversInit(void)
+  95          {
+  96   1      
+  97   1              GPIOInit();
+  98   1              Timer1Init();
+  99   1              PWMInit();
+ 100   1              Uart1Init();
+ 101   1      
+ 102   1      }
+ 103          
+ 104          void ParametersInit()
+ 105          {
+ 106   1              g_fPower = 0;
+ 107   1              g_fGyroXOffset=g_fGyroYOffset=g_fGyroZOffset=0; 
+ 108   1      }
+ 109          
+ 110          /***************************************************************
+ 111          ** 作　  者: Songyimiao
+ 112          ** 官    网：http://www.miaowlabs.com
+ 113          ** 淘    宝：http://miaowlabs.taobao.com
+ 114          ** 日　  期: 2015年11月29日
+ 115          ** 函数名称: DataSynthesis
+ 116          ** 功能描述: 数据合成函数            
+C51 COMPILER V9.00   FUNC                                                                  09/11/2016 18:20:09 PAGE 3   
 
- 117          ** 输　  出:   
- 118          ** 备    注: 
- 119          ********************喵呜实验室版权所有**************************
- 120          ***************************************************************/
- 121          int DataSynthesis(unsigned char REG_Address)    
- 122          {
- 123   1              char idata uiHighByte; /*高八位*/
- 124   1              char idata ucLowByte; /*低八位*/
- 125   1      
- 126   1              uiHighByte = Single_ReadI2C(REG_Address)  ;
- 127   1              ucLowByte  = Single_ReadI2C(REG_Address+1);
- 128   1      
- 129   1              return ((uiHighByte << 8) + ucLowByte);   /*返回合成数据*/
- 130   1      }
- 131          
- 132          /***************************************************************
- 133          ** 作　  者: Songyimiao
- 134          ** 官    网：http://www.miaowlabs.com
- 135          ** 淘    宝：http://miaowlabs.taobao.com
- 136          ** 日　  期: 2015年11月29日
- 137          ** 函数名称: SampleInputVoltage
- 138          ** 功能描述: MPU6050采样函数            
- 139          ** 输　  入:   
- 140          ** 输　  出:   
- 141          ** 备    注: 
- 142          ********************喵呜实验室版权所有**************************
- 143          ***************************************************************/
- 144          void SampleInputVoltage(void)
- 145          {       
- 146   1      
- 147   1              g_iGyro_X_Axis   = DataSynthesis(GYRO_XOUT_H) ; //陀螺仪X轴
- 148   1              g_iGyro_Y_Axis   = DataSynthesis(GYRO_YOUT_H) ; //陀螺仪Y轴
- 149   1              g_iGyro_Z_Axis   = DataSynthesis(GYRO_ZOUT_H) ; //陀螺仪Z轴
- 150   1          g_iAccel_X_Axis  = DataSynthesis(ACCEL_XOUT_H); //加速度X轴         
- 151   1              g_iAccel_Y_Axis  = DataSynthesis(ACCEL_YOUT_H); //加速度Y轴
- 152   1              g_iAccel_Z_Axis  = DataSynthesis(ACCEL_ZOUT_H); //加速度Z轴
- 153   1      }
- 154          
- 155          /***************************************************************
- 156          ** 作　  者: Songyimiao
- 157          ** 官    网：http://www.miaowlabs.com
- 158          ** 淘    宝：http://miaowlabs.taobao.com
- 159          ** 日　  期: 2015年11月29日
- 160          ** 函数名称: GyroRevise
- 161          ** 功能描述: 陀螺仪校正函数            
- 162          ** 输　  入:   
- 163          ** 输　  出:   
- 164          ** 备    注: 
- 165          ********************喵呜实验室版权所有**************************
- 166          ***************************************************************/
- 167          void GetGyroRevise()
- 168          {
- 169   1              long int tempsumx,tempsumy,tempsumz;
- 170   1              int temp;
- 171   1              tempsumx=0;
- 172   1              tempsumy=0;
- 173   1              tempsumz=0;
- 174   1              for(temp=0;temp<100;temp++)
- 175   1              {
- 176   2                      tempsumx += DataSynthesis(GYRO_XOUT_H) ;
- 177   2                      tempsumy += DataSynthesis(GYRO_YOUT_H) ;
- 178   2                      tempsumz += DataSynthesis(GYRO_ZOUT_H) ;
-C51 COMPILER V9.00   FUNC                                                                  07/23/2016 15:35:45 PAGE 4   
+ 117          ** 输　  入:   
+ 118          ** 输　  出:   
+ 119          ** 备    注: 
+ 120          ********************喵呜实验室版权所有**************************
+ 121          ***************************************************************/
+ 122          int DataSynthesis(unsigned char REG_Address)    
+ 123          {
+ 124   1              char idata uiHighByte; /*高八位*/
+ 125   1              char idata ucLowByte; /*低八位*/
+ 126   1      
+ 127   1              uiHighByte = Single_ReadI2C(REG_Address)  ;
+ 128   1              ucLowByte  = Single_ReadI2C(REG_Address+1);
+ 129   1      
+ 130   1              return ((uiHighByte << 8) + ucLowByte);   /*返回合成数据*/
+ 131   1      }
+ 132          
+ 133          /***************************************************************
+ 134          ** 作　  者: Songyimiao
+ 135          ** 官    网：http://www.miaowlabs.com
+ 136          ** 淘    宝：http://miaowlabs.taobao.com
+ 137          ** 日　  期: 2015年11月29日
+ 138          ** 函数名称: SampleInputVoltage
+ 139          ** 功能描述: MPU6050采样函数            
+ 140          ** 输　  入:   
+ 141          ** 输　  出:   
+ 142          ** 备    注: 
+ 143          ********************喵呜实验室版权所有**************************
+ 144          ***************************************************************/
+ 145          void SampleInputVoltage(void)
+ 146          {       
+ 147   1      
+ 148   1              g_iGyro_X_Axis   = DataSynthesis(GYRO_XOUT_H) ; //陀螺仪X轴
+ 149   1              g_iGyro_Y_Axis   = DataSynthesis(GYRO_YOUT_H) ; //陀螺仪Y轴
+ 150   1              g_iGyro_Z_Axis   = DataSynthesis(GYRO_ZOUT_H) ; //陀螺仪Z轴
+ 151   1          g_iAccel_X_Axis  = DataSynthesis(ACCEL_XOUT_H); //加速度X轴         
+ 152   1              g_iAccel_Y_Axis  = DataSynthesis(ACCEL_YOUT_H); //加速度Y轴
+ 153   1              g_iAccel_Z_Axis  = DataSynthesis(ACCEL_ZOUT_H); //加速度Z轴
+ 154   1      }
+ 155          
+ 156          /***************************************************************
+ 157          ** 作　  者: Songyimiao
+ 158          ** 官    网：http://www.miaowlabs.com
+ 159          ** 淘    宝：http://miaowlabs.taobao.com
+ 160          ** 日　  期: 2015年11月29日
+ 161          ** 函数名称: GyroRevise
+ 162          ** 功能描述: 陀螺仪校正函数            
+ 163          ** 输　  入:   
+ 164          ** 输　  出:   
+ 165          ** 备    注: 
+ 166          ********************喵呜实验室版权所有**************************
+ 167          ***************************************************************/
+ 168          void GetGyroRevise()
+ 169          {
+ 170   1              long int tempsumx,tempsumy,tempsumz;
+ 171   1              int temp;
+ 172   1              tempsumx=0;
+ 173   1              tempsumy=0;
+ 174   1              tempsumz=0;
+ 175   1              for(temp=0;temp<100;temp++)
+ 176   1              {
+ 177   2                      tempsumx += DataSynthesis(GYRO_XOUT_H) ;
+ 178   2                      tempsumy += DataSynthesis(GYRO_YOUT_H) ;
+C51 COMPILER V9.00   FUNC                                                                  09/11/2016 18:20:09 PAGE 4   
 
- 179   2              }
- 180   1              g_fGyroXOffset = tempsumx/100;
- 181   1              g_fGyroYOffset = tempsumy/100;
- 182   1              g_fGyroZOffset = tempsumz/100;
- 183   1      }
- 184          
+ 179   2                      tempsumz += DataSynthesis(GYRO_ZOUT_H) ;
+ 180   2              }
+ 181   1              g_fGyroXOffset = tempsumx/100;
+ 182   1              g_fGyroYOffset = tempsumy/100;
+ 183   1              g_fGyroZOffset = tempsumz/100;
+ 184   1      }
  185          
  186          
- 187          void LEDRUN()
- 188          {
- 189   1              LED0=0;
- 190   1              Delaynms(300);
- 191   1              LED1=0;
- 192   1              Delaynms(300);
- 193   1              LED2=0;
- 194   1              Delaynms(300);
- 195   1              LED3=0;
- 196   1              Delaynms(300);
- 197   1              LED3=1;
- 198   1              Delaynms(300);
- 199   1              LED2=1;
- 200   1              Delaynms(300);
- 201   1              LED1=1;
- 202   1              Delaynms(300);
- 203   1              LED0=1; 
- 204   1      }
- 205          
+ 187          
+ 188          void LEDRUN()
+ 189          {
+ 190   1              LED0=0;
+ 191   1              Delaynms(300);
+ 192   1              LED1=0;
+ 193   1              Delaynms(300);
+ 194   1              LED2=0;
+ 195   1              Delaynms(300);
+ 196   1              LED3=0;
+ 197   1              Delaynms(300);
+ 198   1              LED3=1;
+ 199   1              Delaynms(300);
+ 200   1              LED2=1;
+ 201   1              Delaynms(300);
+ 202   1              LED1=1;
+ 203   1              Delaynms(300);
+ 204   1              LED0=1; 
+ 205   1      }
  206          
  207          
  208          
  209          
  210          
- 211          /***************************************************************
- 212          ** 作　  者: Songyimiao
- 213          ** 官    网：http://www.miaowlabs.com
- 214          ** 淘    宝：http://miaowlabs.taobao.com
- 215          ** 日　  期: 20160415
- 216          ** 函数名称: BatteryChecker
- 217          ** 功能描述: 电量检测（若电量不足，将亮起红灯）           
- 218          ** 输　  入:   
- 219          ** 输　  出:   
- 220          ** 备    注: 
- 221          ********************喵呜实验室版权所有**************************
- 222          ***************************************************************/
- 223          void BatteryChecker()
- 224          {
- 225   1      
- 226   1              g_fPower = GetADCResult();                                      //参考电压5.02V 检测max4.2V min3.7V
- 227   1      //      g_fPower = g_fPower / 206 * 4200;                       //3.7/5.02*256=188         4.2/5.02*256=214
- 228   1              if(g_fPower <= 180)                                             
- 229   1              {
- 230   2                      LED_RED=0;
- 231   2              }
- 232   1              else
- 233   1              {
- 234   2                      LED_RED=1;
- 235   2              }
- 236   1      
- 237   1      }
- 238          
- 239          void TickSound(void)
- 240          {
-C51 COMPILER V9.00   FUNC                                                                  07/23/2016 15:35:45 PAGE 5   
+ 211          
+ 212          /***************************************************************
+ 213          ** 作　  者: Songyimiao
+ 214          ** 官    网：http://www.miaowlabs.com
+ 215          ** 淘    宝：http://miaowlabs.taobao.com
+ 216          ** 日　  期: 20160415
+ 217          ** 函数名称: BatteryChecker
+ 218          ** 功能描述: 电量检测（若电量不足，将亮起红灯）           
+ 219          ** 输　  入:   
+ 220          ** 输　  出:   
+ 221          ** 备    注: 
+ 222          ********************喵呜实验室版权所有**************************
+ 223          ***************************************************************/
+ 224          void BatteryChecker()
+ 225          {
+ 226   1      
+ 227   1              g_fPower = GetADCResult();                                      //参考电压5.02V 检测max4.2V min3.7V
+ 228   1      //      g_fPower = g_fPower / 206 * 4200;                       //3.7/5.02*256=188         4.2/5.02*256=214
+ 229   1              if(g_fPower <= 180)                                             
+ 230   1              {
+ 231   2                      LED_RED=0;
+ 232   2              }
+ 233   1              else
+ 234   1              {
+ 235   2                      LED_RED=1;
+ 236   2              }
+ 237   1      
+ 238   1      }
+ 239          
+ 240          void TickSound(void)
+C51 COMPILER V9.00   FUNC                                                                  09/11/2016 18:20:09 PAGE 5   
 
- 241   1              PWMCKS=0x10;         
- 242   1              T2L = 0xEB;     
- 243   1              T2H = 0xFF;
- 244   1              PWM(960,960,960,960);
- 245   1              Delaynms(100); //校准完毕滴一声
- 246   1          PWM(1000,1000,1000,1000);   
- 247   1          PWMCKS=0x00;
- 248   1              T2L = 0xD5;                     //设定定时初值
- 249   1              T2H = 0xFF;                     //设定定时初值                  
- 250   1      }
- 251          
- 252          void AttitudeControl()
- 253          {
- 254   1              g_fZAngleRemote= ((float)TxBuf[4]-128)*1.5;
- 255   1              Angle_gz=g_fZAngleRemote-Angle_gz; 
- 256   1              g_fZAngleCtrOut=Angle_gz*g_fcZAngle_P+(Angle_gz-Anglezlate)*g_fcZAngle_D;
- 257   1      
- 258   1              Anglezlate=Angle_gz;
- 259   1      
- 260   1      //X轴 
- 261   1              g_fXAngleRemote = ((float)RxBuf[2]- 128)/7;      //max 128/7=18
- 262   1      //外环
- 263   1              g_fXAngleError = g_fXAngleRemote - roll + g_fOffsetx; //ROLL对应硬件X轴
- 264   1      
- 265   1              if(g_Throttle>20)
- 266   1              {
- 267   2                      g_fXAngleErrorIntegral+=g_fXAngleError;//外环积分(油门小于某个值时不积分)
- 268   2              }
- 269   1              else
- 270   1              {
- 271   2                      g_fXAngleErrorIntegral=0; //油门小于定值时清除积分值
- 272   2              }
- 273   1              if(g_fXAngleErrorIntegral>500){g_fXAngleErrorIntegral=500;}
- 274   1              else if(g_fXAngleErrorIntegral<-500){g_fXAngleErrorIntegral=-500;}//积分限幅
- 275   1              Out_PID_X=g_fXAngleError*g_fcXAngle_P_Out+g_fXAngleErrorIntegral*g_fcXAngle_I_Out;//外环PI
- 276   1      //内环
- 277   1              g_fXAngleError_In = Out_PID_X - Angle_gx - g_fOffsetx ;
- 278   1      
- 279   1              if(g_Throttle>20)
- 280   1              {
- 281   2                      g_fXAngleErrorIntegral_IN += g_fXAngleError_In;//(油门小于某个值时不积分)
- 282   2              }
- 283   1              else
- 284   1              {
- 285   2                      g_fXAngleErrorIntegral_IN =0; //油门小于定值时清除积分值
- 286   2              }
- 287   1              if(g_fXAngleErrorIntegral_IN>500){g_fXAngleErrorIntegral_IN=500;}
- 288   1              else if(g_fXAngleErrorIntegral_IN<(-500)){g_fXAngleErrorIntegral_IN=(-500);}//积分限幅
- 289   1      
- 290   1              g_fXAngleCtrOut=g_fXAngleError_In*g_fcXAngle_P_In+g_fXAngleErrorIntegral_IN*g_fcXAngle_I_In-(Angle_gx-gyr
+ 241          {
+ 242   1              PWMCKS=0x10;         
+ 243   1              T2L = 0xEB;     
+ 244   1              T2H = 0xFF;
+ 245   1              PWM(960,960,960,960);
+ 246   1              Delaynms(100); //校准完毕滴一声
+ 247   1          PWM(1000,1000,1000,1000);   
+ 248   1          PWMCKS=0x00;
+ 249   1              T2L = 0xD5;                     //设定定时初值
+ 250   1              T2H = 0xFF;                     //设定定时初值                  
+ 251   1      }
+ 252          
+ 253          void AttitudeControl()
+ 254          {
+ 255   1              g_fZAngleRemote= ((float)TxBuf[4]-128)*1.5;
+ 256   1              Angle_gz=g_fZAngleRemote-Angle_gz; 
+ 257   1              g_fZAngleCtrOut=Angle_gz*g_fcZAngle_P+(Angle_gz-Anglezlate)*g_fcZAngle_D;
+ 258   1      
+ 259   1              Anglezlate=Angle_gz;
+ 260   1      
+ 261   1      //X轴 
+ 262   1              g_fXAngleRemote = ((float)RxBuf[2]- 128)/7;      //max 128/7=18
+ 263   1      //外环
+ 264   1              g_fXAngleError = g_fXAngleRemote - roll + g_fOffsetx; //ROLL对应硬件X轴
+ 265   1      
+ 266   1              if(g_Throttle>20)
+ 267   1              {
+ 268   2                      g_fXAngleErrorIntegral+=g_fXAngleError;//外环积分(油门小于某个值时不积分)
+ 269   2              }
+ 270   1              else
+ 271   1              {
+ 272   2                      g_fXAngleErrorIntegral=0; //油门小于定值时清除积分值
+ 273   2              }
+ 274   1              if(g_fXAngleErrorIntegral>500){g_fXAngleErrorIntegral=500;}
+ 275   1              else if(g_fXAngleErrorIntegral<-500){g_fXAngleErrorIntegral=-500;}//积分限幅
+ 276   1              Out_PID_X=g_fXAngleError*g_fcXAngle_P_Out+g_fXAngleErrorIntegral*g_fcXAngle_I_Out;//外环PI
+ 277   1      //内环
+ 278   1              g_fXAngleError_In = Out_PID_X - Angle_gx - g_fOffsetx ;
+ 279   1      
+ 280   1              if(g_Throttle>20)
+ 281   1              {
+ 282   2                      g_fXAngleErrorIntegral_IN += g_fXAngleError_In;//(油门小于某个值时不积分)
+ 283   2              }
+ 284   1              else
+ 285   1              {
+ 286   2                      g_fXAngleErrorIntegral_IN =0; //油门小于定值时清除积分值
+ 287   2              }
+ 288   1              if(g_fXAngleErrorIntegral_IN>500){g_fXAngleErrorIntegral_IN=500;}
+ 289   1              else if(g_fXAngleErrorIntegral_IN<(-500)){g_fXAngleErrorIntegral_IN=(-500);}//积分限幅
+ 290   1      
+ 291   1              g_fXAngleCtrOut=g_fXAngleError_In*g_fcXAngle_P_In+g_fXAngleErrorIntegral_IN*g_fcXAngle_I_In-(Angle_gx-gyr
              -o_x_Last)*g_fcXAngle_D_In;//内环PID
- 291   1              gyro_x_Last = Angle_gx;
- 292   1              
- 293   1              if(g_fXAngleCtrOut>  1000) {g_fXAngleCtrOut =  1000; }  //输出量限幅
- 294   1              if(g_fXAngleCtrOut<(-1000)){g_fXAngleCtrOut =(-1000);}
- 295   1              
- 296   1              MotorOut2= (int)(g_Throttle * 4 - g_fXAngleCtrOut + g_fZAngleCtrOut );  //255*4=1020
- 297   1              MotorOut4= (int)(g_Throttle * 4 + g_fXAngleCtrOut + g_fZAngleCtrOut); 
+ 292   1              gyro_x_Last = Angle_gx;
+ 293   1              
+ 294   1              if(g_fXAngleCtrOut>  1000) {g_fXAngleCtrOut =  1000; }  //输出量限幅
+ 295   1              if(g_fXAngleCtrOut<(-1000)){g_fXAngleCtrOut =(-1000);}
+ 296   1              
+ 297   1              
  298   1      
- 299   1              PWM2 = (1000 - MotorOut2 );        
- 300   1              if(PWM2>1000){PWM2=1000;}
- 301   1              else if(PWM2<0){PWM2=0;}
-C51 COMPILER V9.00   FUNC                                                                  07/23/2016 15:35:45 PAGE 6   
+ 299   1                      
+ 300   1              
+ 301   1      //Y轴部分
+C51 COMPILER V9.00   FUNC                                                                  09/11/2016 18:20:09 PAGE 6   
 
- 302   1              
- 303   1              PWM4 = (1000 - MotorOut4 );
- 304   1              if(PWM4>1000){PWM4=1000;}
- 305   1              else if(PWM4<0){PWM4=0;}
- 306   1      
- 307   1                      
- 308   1              
- 309   1      //Y轴部分
- 310   1              g_fYAngleRemote = ((float)RxBuf[3]- 128)/7;      //max18
- 311   1      //外环
- 312   1              g_fYAngleError = g_fYAngleRemote - pitch + g_fOffsety ; //ROLL对应硬件X轴
- 313   1      
- 314   1              if(g_Throttle>20)
- 315   1              {
- 316   2                      g_fYAngleErrorIntegral+=g_fYAngleError;//外环积分(油门小于某个值时不积分)
- 317   2              }
- 318   1              else
- 319   1              {
- 320   2                      g_fYAngleErrorIntegral=0; //油门小于定值时清除积分值
- 321   2              }
- 322   1              if(g_fYAngleErrorIntegral>500){g_fYAngleErrorIntegral=500;}
- 323   1              else if(g_fYAngleErrorIntegral<-500){g_fYAngleErrorIntegral=-500;}//积分限幅
- 324   1              Out_PID_Y=g_fYAngleError*g_fcXAngle_P_Out+g_fYAngleErrorIntegral*g_fcYAngle_I_Out;//外环PI
- 325   1      //内环
- 326   1              g_fYAngleError_In = Out_PID_Y - Angle_gy ;
- 327   1      
- 328   1              if(g_Throttle>20)
- 329   1              {
- 330   2                      g_fYAngleErrorIntegral_IN += g_fYAngleError_In;//(油门小于某个值时不积分)
- 331   2              }
- 332   1              else
- 333   1              {
- 334   2                      g_fYAngleErrorIntegral_IN =0; //油门小于定值时清除积分值
- 335   2              }
- 336   1              if(g_fYAngleErrorIntegral_IN>500){g_fYAngleErrorIntegral_IN=500;}
- 337   1              else if(g_fYAngleErrorIntegral_IN<(-500)){g_fYAngleErrorIntegral_IN=(-500);}//积分限幅
- 338   1      
- 339   1              g_fYAngleCtrOut=g_fYAngleError_In*g_fcYAngle_P_In+g_fYAngleErrorIntegral_IN*g_fcYAngle_I_In-(Angle_gy-gyr
+ 302   1              g_fYAngleRemote = ((float)RxBuf[3]- 128)/7;      //max18
+ 303   1      //外环
+ 304   1              g_fYAngleError = g_fYAngleRemote - pitch + g_fOffsety ; //ROLL对应硬件X轴
+ 305   1      
+ 306   1              if(g_Throttle>20)
+ 307   1              {
+ 308   2                      g_fYAngleErrorIntegral+=g_fYAngleError;//外环积分(油门小于某个值时不积分)
+ 309   2              }
+ 310   1              else
+ 311   1              {
+ 312   2                      g_fYAngleErrorIntegral=0; //油门小于定值时清除积分值
+ 313   2              }
+ 314   1              if(g_fYAngleErrorIntegral>500){g_fYAngleErrorIntegral=500;}
+ 315   1              else if(g_fYAngleErrorIntegral<-500){g_fYAngleErrorIntegral=-500;}//积分限幅
+ 316   1              Out_PID_Y=g_fYAngleError*g_fcXAngle_P_Out+g_fYAngleErrorIntegral*g_fcYAngle_I_Out;//外环PI
+ 317   1      //内环
+ 318   1              g_fYAngleError_In = Out_PID_Y - Angle_gy ;
+ 319   1      
+ 320   1              if(g_Throttle>20)
+ 321   1              {
+ 322   2                      g_fYAngleErrorIntegral_IN += g_fYAngleError_In;//(油门小于某个值时不积分)
+ 323   2              }
+ 324   1              else
+ 325   1              {
+ 326   2                      g_fYAngleErrorIntegral_IN =0; //油门小于定值时清除积分值
+ 327   2              }
+ 328   1              if(g_fYAngleErrorIntegral_IN>500){g_fYAngleErrorIntegral_IN=500;}
+ 329   1              else if(g_fYAngleErrorIntegral_IN<(-500)){g_fYAngleErrorIntegral_IN=(-500);}//积分限幅
+ 330   1      
+ 331   1              g_fYAngleCtrOut=g_fYAngleError_In*g_fcYAngle_P_In+g_fYAngleErrorIntegral_IN*g_fcYAngle_I_In-(Angle_gy-gyr
              -o_y_Last)*g_fcYAngle_D_In;//内环PID
- 340   1              gyro_y_Last = Angle_gy;
- 341   1              
- 342   1          if(g_fYAngleCtrOut>1000){g_fYAngleCtrOut=1000;}  //输出量限幅
- 343   1              if(g_fYAngleCtrOut<-1000){g_fYAngleCtrOut=-1000;}
- 344   1              
- 345   1              MotorOut1= (int)g_Throttle * 4 - g_fYAngleCtrOut - g_fZAngleCtrOut;
- 346   1              MotorOut3= (int)g_Throttle * 4 + g_fYAngleCtrOut - g_fZAngleCtrOut;
- 347   1      
- 348   1              PWM1=(1000 - MotorOut1 );         
- 349   1              if(PWM1>1000){PWM1=1000;}
- 350   1              else if(PWM1<0){PWM1=0;}
- 351   1              
- 352   1              PWM3=(1000 - MotorOut3 );
- 353   1              if(PWM3>1000){PWM3=1000;}
- 354   1              else if(PWM3<0){PWM3=0;}
- 355   1      }
+ 332   1              gyro_y_Last = Angle_gy;
+ 333   1              
+ 334   1          if(g_fYAngleCtrOut>1000){g_fYAngleCtrOut=1000;}  //输出量限幅
+ 335   1              if(g_fYAngleCtrOut<-1000){g_fYAngleCtrOut=-1000;}
+ 336   1      
+ 337   1              MotorOut2= (int)(g_Throttle * 4 + g_fYAngleCtrOut - g_fXAngleCtrOut+ g_fZAngleCtrOut ); //255*4=1020
+ 338   1              MotorOut4= (int)(g_Throttle * 4 - g_fYAngleCtrOut + g_fXAngleCtrOut+ g_fZAngleCtrOut );                 
+ 339   1              MotorOut1= (int)(g_Throttle * 4 - g_fYAngleCtrOut - g_fXAngleCtrOut- g_fZAngleCtrOut );
+ 340   1              MotorOut3= (int)(g_Throttle * 4 + g_fYAngleCtrOut + g_fXAngleCtrOut- g_fZAngleCtrOut );
+ 341   1      //      MotorOut2= (int)(g_Throttle * 4 + g_fYAngleCtrOut );    //255*4=1020
+ 342   1      //      MotorOut4= (int)(g_Throttle * 4 - g_fYAngleCtrOut );            
+ 343   1      //      MotorOut1= (int)(g_Throttle * 4 - g_fYAngleCtrOut );
+ 344   1      //      MotorOut3= (int)(g_Throttle * 4 + g_fYAngleCtrOut );
+ 345   1              PWM1=(1000 - MotorOut1 );         
+ 346   1              if(PWM1>1000){PWM1=1000;}
+ 347   1              else if(PWM1<0){PWM1=0;}
+ 348   1              
+ 349   1              PWM3=(1000 - MotorOut3 );
+ 350   1              if(PWM3>1000){PWM3=1000;}
+ 351   1              else if(PWM3<0){PWM3=0;}
+ 352   1      
+ 353   1              PWM2 = (1000 - MotorOut2 );        
+ 354   1              if(PWM2>1000){PWM2=1000;}
+ 355   1              else if(PWM2<0){PWM2=0;}
+ 356   1              
+ 357   1              PWM4 = (1000 - MotorOut4 );
+ 358   1              if(PWM4>1000){PWM4=1000;}
+ 359   1              else if(PWM4<0){PWM4=0;}
+ 360   1      }
 
+
+C51 COMPILER V9.00   FUNC                                                                  09/11/2016 18:20:09 PAGE 7   
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =   2855    ----
+   CODE SIZE        =   2941    ----
    CONSTANT SIZE    =     60    ----
-   XDATA SIZE       =    288      15
+   XDATA SIZE       =    283      15
    PDATA SIZE       =   ----    ----
-C51 COMPILER V9.00   FUNC                                                                  07/23/2016 15:35:45 PAGE 7   
-
    DATA SIZE        =   ----    ----
    IDATA SIZE       =   ----       2
    BIT SIZE         =   ----    ----

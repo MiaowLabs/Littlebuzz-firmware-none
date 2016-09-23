@@ -17,8 +17,10 @@ extern int   g_iGyro_X_Axis,g_iGyro_Y_Axis,g_iGyro_Z_Axis  ;	//ÍÓÂÝÒÇYÖáÊý¾Ý
 extern unsigned char g_fPower;
 extern unsigned char g_ucLEDCount;
 extern int g_fGyroXOffset,g_fGyroYOffset,g_fGyroZOffset;
-extern float g_fOffsetx,g_fOffsety;
+extern char g_fOffsetx,g_fOffsety;
 extern int i;
+extern unsigned char unlock;
+
 void DriversInit(void);
 int DataSynthesis(unsigned char REG_Address);
 void SampleInputVoltage(void);	

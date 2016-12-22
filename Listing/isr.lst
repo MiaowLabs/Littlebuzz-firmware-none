@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   ISR                                                                   09/11/2016 18:20:09 PAGE 1   
+C51 COMPILER V9.00   ISR                                                                   12/19/2016 15:28:12 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE ISR
@@ -34,7 +34,7 @@ line level    source
   24          {  
   25   1      //      short tst16 = g_iAccel_X_Axis;
   26   1              i++;
-  27   1      
+  27   1              if(SoftTimer)SoftTimer--;
   28   1              g_Throttle=(float)(255 - RxBuf[1]);     //ÓÍÃÅ  RxBuf[1]:0-255
   29   1      
   30   1              if(g_Throttle>20)//Èç¹ûÓÍÃÅ´óÓÚ80 ¼´ÒÑÆð·É
@@ -47,8 +47,8 @@ line level    source
   37   2                      else{g_CountRunAway=0;}
   38   2              }
   39   1              else{g_CountRunAway=0;} //ÊÕµ½ÐÅºÅÍË³öÊ§¿Ø±£»¤
-  40   1              if(g_CountRunAway==128){g_Throttle=30;RxBuf[1]=128;RxBuf[2]=128;} //´¥·¢Ê§¿Ø±£»¤ ÓÍÃÅÎª1°ëÉÙÒ»µã£¬»ºÂýÏÂ½
-             -µ£¬¸©Ñöºá¹ö·½Ïò¶æ¹éÖÐ
+  40   1              if(g_CountRunAway==128){g_Throttle=30;RxBuf[1]=128;RxBuf[2]=128;} //´¥·¢Ê§¿Ø±£»¤ ÓÍÃÅ¼õµÍ£¬»ºÂýÏÂ½µ£¬¸©Ñö
+             -ºá¹ö·½Ïò¶æ¹éÖÐ
   41   1      
   42   1              
   43   1              g_LastCountRunAway=RxBuf[0];
@@ -62,7 +62,7 @@ line level    source
   51   1              Angle_gz -= g_fGyroZOffset;
   52   1              Angle_gx=(float)g_iGyro_X_Axis/65.5;   //ÍÓÂÝÒÇ´¦Àí
   53   1              Angle_gy=(float)g_iGyro_Y_Axis/65.5;   //ÍÓÂÝÒÇÁ¿³Ì 
-C51 COMPILER V9.00   ISR                                                                   09/11/2016 18:20:09 PAGE 2   
+C51 COMPILER V9.00   ISR                                                                   12/19/2016 15:28:12 PAGE 2   
 
   54   1              Angle_gz=(float)g_iGyro_Z_Axis/65.5;   //×ª»»¹ØÏµ65.5LSB/¶È
   55   1              
@@ -70,20 +70,20 @@ line level    source
   57   1              IMUupdate(Angle_gx*0.0174533,Angle_gy*0.0174533,Angle_gz*0.0174533,Angle_ax*0.0174533,Angle_ay*0.0174533,
              -Angle_az*0.0174533);
   58   1              //*0.0174533ÎªPI/180 Ä¿µÄÊÇ½«½Ç¶È×ª»¡¶È
-  59   1      
-  60   1              if(123<TxBuf[2]<133)
+  59   1      /*
+  60   1              if(123<RxBuf[2]<133)
   61   1              {
-  62   2              TxBuf[2]=128;
-  63   2              }
-  64   1              if(123<TxBuf[3]<133)
+  62   1              RxBuf[2]=128;
+  63   1              }
+  64   1              if(123<RxBuf[3]<133)
   65   1              {
-  66   2              TxBuf[3]=128;
-  67   2              }
-  68   1              if(113<TxBuf[4]<143)
+  66   1              RxBuf[3]=128;
+  67   1              }
+  68   1              if(113<RxBuf[4]<143)
   69   1              {
-  70   2              TxBuf[4]=128;
-  71   2              }
-  72   1      
+  70   1              RxBuf[4]=128;
+  71   1              }
+  72   1      */
   73   1              AttitudeControl();
   74   1                                                                
   75   1              if(g_Throttle>=20)
@@ -102,35 +102,32 @@ line level    source
                       OutData[1] = Angle_gy;
                       OutData[2] = pitch;//¶ÔÓ¦Angle_gy
                       OutData[3] = roll; //¶ÔÓ¦Angle_gx ¶ÔÓ¦Ó²¼þYÖá  
-              //      OutData[0] = g_fOffsetx;
-               //     OutData[1] = g_fOffsety;        
-              //      OutData[2] = g_fPower;
-              //      OutData[3] = yaw; 
+              
                       OutPut_Data();          
                                         
               #endif                  
-  98   1              
-  99   1                      g_ucLEDCount++;
- 100   1                      if(g_ucLEDCount >=125) //LED1µÆ1Ãë½»ÌæÉÁË¸
- 101   1                      {
- 102   2                              g_ucLEDCount=0;
- 103   2                              LED_GREEN = ~LED_GREEN;
- 104   2                      }
- 105   1                               
- 106   1      }
- 107          
- 108          
- 109                                           
+  95   1              
+  96   1                      g_ucLEDCount++;
+  97   1                      if(g_ucLEDCount >=125) //LED1µÆ1Ãë½»ÌæÉÁË¸
+  98   1                      {
+  99   2                              g_ucLEDCount=0;
+ 100   2                              LED_RED = ~LED_RED;
+ 101   2                      }
+ 102   1                               
+ 103   1      }
+ 104          
+ 105          
+ 106                                           
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    990    ----
+   CODE SIZE        =    906    ----
    CONSTANT SIZE    =   ----    ----
-C51 COMPILER V9.00   ISR                                                                   09/11/2016 18:20:09 PAGE 3   
-
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
    DATA SIZE        =   ----    ----
+C51 COMPILER V9.00   ISR                                                                   12/19/2016 15:28:12 PAGE 3   
+
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.

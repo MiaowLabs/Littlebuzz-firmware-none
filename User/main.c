@@ -26,16 +26,17 @@
 void main()
 {
 	DisableInterrupts();//禁止总中断
-	DriversInit();
-	ADCInit();	
-	MPU6050Init();
-	LEDRUN(); 
-	GetGyroRevise();	
-	LED_GREEN = 0;
-	ParametersInit();
-	Delaynms(100);	
+	DriversInit();//底层驱动初始化		
+	MPU6050Init();//MPU6050初始化
+	LEDRUN();//电机臂跑马灯 
+
+	GetGyroRevise();//校正陀螺仪	
+//	LED_GREEN = 1; //绿灯灭 太刺眼
+	ParametersInit();//系统参数初始化
+	SimpleKalman(0.3,1.0);
+	Delaynms(50);	
 	
-	IAPRead();
+	IAPRead(); //读取IAP数据
 
 	while(NRF24L01_Check())//检测不到24L01
 	{
@@ -48,11 +49,11 @@ void main()
 	SetRX_Mode();	 //接收模式
 
 	Delaynms(10);	 
-	RxBuf[1]=255;
+	RxBuf[1]=255; //油门通道
 	RxBuf[2]=128; //俯仰
 	RxBuf[3]=128; //横滚
 	RxBuf[4]=128;//yaw
-
+	
 	LED2=0;	//尾灯
 	LED1=0;	//尾灯
 	TickSound();  //启动响声 用到T2
@@ -61,28 +62,17 @@ void main()
 									  
 	while(1)
 	{
-/*		if(TxBuf[1]<=5) {
-		unlock=1;
-		LED0=0;
-		LED2=0;	//尾灯
-		LED1=0;	//尾灯
-		LED3=0;
-		}
-		if (unlock == 1 ) EnableInterrupts();
-		else if(unlock == 0 ) {
-		LED0=0;
-		LED2=0;	//尾灯
-		LED1=0;	//尾灯
-		LED3=0;
-		Delaynms(200);
-		LED0=1;
-		LED2=1;	//尾灯
-		LED1=1;	//尾灯
-		LED3=1;
-		Delaynms(200);
-		}				  */
+	TxBuf[1]=(int)roll;
+	TxBuf[2]=(int)pitch;	
+	TxBuf[0]=(int)(g_fPower*10);	 //-128-127 
 	  STC_ISP();	//ISP 下载不用冷启动 				   
-	  Delay(500);
+	if(!SoftTimer){
+		SoftTimer = 10;
+		SetTX_Mode();
+	  	nRF24L01_TxPacket(TxBuf);	//发送模式	
+		Delaynms(1);
+	  	SetRX_Mode();
+	}
 	  nRF24L01_RxPacket(RxBuf);
 	  BatteryChecker();
 	 

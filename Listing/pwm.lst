@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   PWM                                                                   09/11/2016 18:20:08 PAGE 1   
+C51 COMPILER V9.00   PWM                                                                   12/19/2016 15:28:12 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE PWM
@@ -36,11 +36,11 @@ line level    source
   26   1              PWM2T1 = 1000;                 //设置PWM3第1次反转的PWM计数
   27   1          PWM2T2 = 1001;                              //设置PWM3第2次反转的PWM计数
   28   1                                                                              //占空比为(PWM3T2-PWM3T1)/PWMC
-  29   1                                                                              //初始PWM3占空比为100%
+  29   1                                                                              //初始PWM3占空比为0%
   30   1              PWM3T1 = 1000;                 //设置PWM3第1次反转的PWM计数
   31   1          PWM3T2 = 1001;                              //设置PWM3第2次反转的PWM计数
   32   1                                                                              //占空比为(PWM3T2-PWM3T1)/PWMC
-  33   1                                                                              //初始PWM3占空比为100%
+  33   1                                                                              //初始PWM3占空比为0%
   34   1      
   35   1              PWM4T1 = 1000;                 //设置PWM4第1次反转的PWM计数
   36   1          PWM4T2 = 1001;                              //设置PWM4第2次反转的PWM计数
@@ -62,7 +62,7 @@ line level    source
   52          /*
   53          void PCAInit()
   54          {
-C51 COMPILER V9.00   PWM                                                                   09/11/2016 18:20:08 PAGE 2   
+C51 COMPILER V9.00   PWM                                                                   12/19/2016 15:28:12 PAGE 2   
 
   55                  CMOD = 0x04;//选择定时器0的溢出脉冲作为计数源
   56                  AUXR1 |= 0x20;  //切换引脚

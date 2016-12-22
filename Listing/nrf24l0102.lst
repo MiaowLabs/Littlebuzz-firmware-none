@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   NRF24L0102                                                            09/11/2016 18:20:08 PAGE 1   
+C51 COMPILER V9.00   NRF24L0102                                                            12/19/2016 15:28:11 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE NRF24L0102
@@ -62,7 +62,7 @@ line level    source
   52   1          //SPI_RW_Reg(WRITE_REG + EN_RXADDR, 0x01);    //½ÓÊÕÒªÊ¹ÄÜ½ÓÊÕÍ¨µÀ0
   53   1      
   54   1              SPI_RW_Reg(WRITE_REG + RF_CH, 0);        //   ÉèÖÃÐÅµÀ¹¤×÷Îª2.4GHZ£¬ÊÕ·¢±ØÐëÒ»ÖÂ
-C51 COMPILER V9.00   NRF24L0102                                                            09/11/2016 18:20:08 PAGE 2   
+C51 COMPILER V9.00   NRF24L0102                                                            12/19/2016 15:28:11 PAGE 2   
 
   55   1              SPI_RW_Reg(WRITE_REG + RX_PW_P0, RX_PLOAD_WIDTH); //ÉèÖÃ½ÓÊÕÊý¾Ý³¤¶È£¬±¾´ÎÉèÖÃÎª32×Ö½Ú
   56   1              SPI_RW_Reg(WRITE_REG + RF_SETUP, 0x07);                 //ÉèÖÃ·¢ÉäËÙÂÊÎª1MB/S£¬·¢Éä¹¦ÂÊÎª×î´óÖµ+7dB£¬ÓÉÓÚÓÐX2401L¹¦·Å
@@ -126,7 +126,7 @@ line level    source
  113          uint SPI_Read_Buf(uchar reg, uchar *pBuf, uchar uchars)
  114          {
  115   1              uint status,uchar_ctr;
-C51 COMPILER V9.00   NRF24L0102                                                            09/11/2016 18:20:08 PAGE 3   
+C51 COMPILER V9.00   NRF24L0102                                                            12/19/2016 15:28:11 PAGE 3   
 
  116   1              
  117   1              CSN = 0;                                // Set CSN low, init SPI tranaction
@@ -162,78 +162,90 @@ line level    source
  146          void SetRX_Mode(void)
  147          {
  148   1              CE=0;
- 149   1              SPI_RW_Reg(WRITE_REG + CONFIG2, 0x0f);                  // IRQÊÕ·¢Íê³ÉÖÐ¶ÏÏìÓ¦£¬16Î»CRC £¬Ö÷½ÓÊÕ
- 150   1              CE = 1; 
- 151   1      }
- 152          /******************************************************************************************************/
- 153          /*º¯Êý£ºunsigned char nRF24L01_RxPacket(unsigned char* rx_buf)
- 154          /*¹¦ÄÜ£ºÊý¾Ý¶ÁÈ¡ºó·ÅÈçrx_buf½ÓÊÕ»º³åÇøÖÐ
- 155          /******************************************************************************************************/
- 156          unsigned char nRF24L01_RxPacket(unsigned char* rx_buf)
- 157          {
- 158   1              
- 159   1        unsigned char revale=0;
- 160   1              //DisableInterrupts;
- 161   1              sta=SPI_Read(STATUS);   // ¶ÁÈ¡×´Ì¬¼Ä´æÆäÀ´ÅÐ¶ÏÊý¾Ý½ÓÊÕ×´¿ö
- 162   1              if(RX_DR)                               // ÅÐ¶ÏÊÇ·ñ½ÓÊÕµ½Êý¾Ý
- 163   1              {
- 164   2                  CE = 0;                     //SPIÊ¹ÄÜ
- 165   2                      SPI_Read_Buf(RD_RX_PLOAD,rx_buf,TX_PLOAD_WIDTH);// read receive payload from RX_FIFO buffer
- 166   2                      revale =1;                      //¶ÁÈ¡Êý¾ÝÍê³É±êÖ¾
- 167   2              }
- 168   1              SPI_RW_Reg(WRITE_REG+STATUS,sta);   //½ÓÊÕµ½Êý¾ÝºóRX_DR,TX_DS,MAX_PT¶¼ÖÃ¸ßÎª1£¬Í¨¹ýÐ´1À´Çå³þÖÐ¶Ï±êÖ¾
- 169   1                 CE=1; 
- 170   1              // EnableInterrupts;                                                                      //£¡£¡£¡£¡£¡£¡£
-             -¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡£¡
- 171   1              return revale;
- 172   1      }
- 173          /*********************************************************************************************************
-             -**
- 174          /*º¯Êý£ºvoid nRF24L01_TxPacket(unsigned char * tx_buf)
-C51 COMPILER V9.00   NRF24L0102                                                            09/11/2016 18:20:08 PAGE 4   
+ 149   1              SPI_RW_Reg(WRITE_REG+STATUS,0xff);
+ 150   1              SPI_RW_Reg(FLUSH_RX, 0x00);
+ 151   1              SPI_RW_Reg(WRITE_REG + CONFIG2, 0x7f);                  // IRQÊÕ·¢Íê³ÉÖÐ¶ÏÏìÓ¦£¬16Î»CRC £¬Ö÷½ÓÊÕ
+ 152   1              CE = 1; 
+ 153   1              inerDelay_us(2600);   
+ 154   1      }
+ 155          void SetTX_Mode(void)
+ 156          {
+ 157   1              CE=0;
+ 158   1              SPI_RW_Reg(WRITE_REG+STATUS,0xff);
+ 159   1              SPI_RW_Reg(FLUSH_TX, 0x00);
+ 160   1              SPI_RW_Reg(WRITE_REG + CONFIG2, 0x7e);                  // IRQÊÕ·¢Íê³ÉÖÐ¶ÏÏìÓ¦£¬16Î»CRC £¬Ö÷½ÓÊÕ
+ 161   1              CE = 1; 
+ 162   1              inerDelay_us(2600);   
+ 163   1      }
+ 164          /******************************************************************************************************/
+ 165          /*º¯Êý£ºunsigned char nRF24L01_RxPacket(unsigned char* rx_buf)
+ 166          /*¹¦ÄÜ£ºÊý¾Ý¶ÁÈ¡ºó·ÅÈçrx_buf½ÓÊÕ»º³åÇøÖÐ
+ 167          /******************************************************************************************************/
+ 168          unsigned char nRF24L01_RxPacket(unsigned char* rx_buf)
+ 169          {
+ 170   1              unsigned char revale=0;
+ 171   1              //DisableInterrupts;
+ 172   1              sta=SPI_Read(STATUS);   // ¶ÁÈ¡×´Ì¬¼Ä´æÆäÀ´ÅÐ¶ÏÊý¾Ý½ÓÊÕ×´¿ö
+ 173   1              SPI_RW_Reg(WRITE_REG+STATUS,sta);   //½ÓÊÕµ½Êý¾ÝºóRX_DR,TX_DS,MAX_PT¶¼ÖÃ¸ßÎª1£¬Í¨¹ýÐ´1À´Çå³þÖÐ¶Ï±êÖ¾
+ 174   1              if(RX_DR)                               // ÅÐ¶ÏÊÇ·ñ½ÓÊÕµ½Êý¾Ý
+ 175   1              {
+ 176   2                  CE = 0;                     //SPIÊ¹ÄÜ
+C51 COMPILER V9.00   NRF24L0102                                                            12/19/2016 15:28:11 PAGE 4   
 
- 175          /*¹¦ÄÜ£º·¢ËÍ tx_bufÖÐÊý¾Ý
- 176          /*********************************************************************************************************
+ 177   2                      SPI_Read_Buf(RD_RX_PLOAD,rx_buf,TX_PLOAD_WIDTH);// read receive payload from RX_FIFO buffer
+ 178   2                      revale =1;                      //¶ÁÈ¡Êý¾ÝÍê³É±êÖ¾
+ 179   2                      CE=1; 
+ 180   2              }
+ 181   1              
+ 182   1              
+ 183   1              // EnableInterrupts;                                                                      
+ 184   1              return revale;
+ 185   1      }
+ 186          /*********************************************************************************************************
+             -**
+ 187          /*º¯Êý£ºvoid nRF24L01_TxPacket(unsigned char * tx_buf)
+ 188          /*¹¦ÄÜ£º·¢ËÍ tx_bufÖÐÊý¾Ý
+ 189          /*********************************************************************************************************
              -*/
- 177          void nRF24L01_TxPacket(unsigned char * tx_buf)
- 178          {
- 179   1              SPI_RW_Reg(WRITE_REG+STATUS,0xff);
- 180   1              SPI_RW_Reg(0xE1,0xff);
- 181   1              CE=0;           
- 182   1              SPI_Write_Buf(WR_TX_PLOAD, tx_buf, TX_PLOAD_WIDTH);                          
- 183   1              SPI_RW_Reg(WRITE_REG + CONFIG2, 0x0e);                  
- 184   1              CE=1;            
- 185   1              inerDelay_us(10);   //CE¸ßµçÆ½´óÓÚ10us²ÅÄÜ½øÈë·¢ÉäÄ£Ê½
- 186   1      }
- 187          
- 188          unsigned char NRF24L01_Check(void)
- 189                  {
- 190   1              uchar check_in_buf[5]={0x11,0x22,0x33,0x44,0x55};
- 191   1              uchar check_out_buf[5]={0x00};
- 192   1              SPI_Write_Buf(WRITE_REG+TX_ADDR,check_in_buf,5);//Ð´Èë5¸ö×Ö½ÚµÄµØÖ·.    
- 193   1              SPI_Read_Buf(TX_ADDR,check_out_buf,5); //¶Á³öÐ´ÈëµÄµØÖ·  
- 194   1              if((check_out_buf[0] == 0x11)&&(check_out_buf[1] == 0x22)&&(check_out_buf[2] == 0x33)&&(check_out_buf[3] 
+ 190          void nRF24L01_TxPacket(unsigned char * tx_buf)
+ 191          {
+ 192   1              SPI_RW_Reg(WRITE_REG+STATUS,0xff);
+ 193   1              SPI_RW_Reg(0xE1,0xff);
+ 194   1              CE=0;           
+ 195   1              SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, RX_ADDRESS, RX_ADR_WIDTH); // Ð´½ÓÊÕ¶ËµØÖ·
+ 196   1              SPI_Write_Buf(WR_TX_PLOAD, tx_buf, TX_PLOAD_WIDTH);                          
+ 197   1              CE=1;            
+ 198   1              inerDelay_us(200);   //CE¸ßµçÆ½´óÓÚ10us²ÅÄÜ½øÈë·¢ÉäÄ£Ê½
+ 199   1      }
+ 200          
+ 201          unsigned char NRF24L01_Check(void)
+ 202                  {
+ 203   1              uchar check_in_buf[5]={0x11,0x22,0x33,0x44,0x55};
+ 204   1              uchar check_out_buf[5]={0x00};
+ 205   1              SPI_Write_Buf(WRITE_REG+TX_ADDR,check_in_buf,5);//Ð´Èë5¸ö×Ö½ÚµÄµØÖ·.    
+ 206   1              SPI_Read_Buf(TX_ADDR,check_out_buf,5); //¶Á³öÐ´ÈëµÄµØÖ·  
+ 207   1              if((check_out_buf[0] == 0x11)&&(check_out_buf[1] == 0x22)&&(check_out_buf[2] == 0x33)&&(check_out_buf[3] 
              -== 0x44)&&(check_out_buf[4] == 0x55))
- 195   1              return 0;
- 196   1              else return 1;
- 197   1      }                                                                  
- 198                          
- 199          void checkstatus()
- 200          {
- 201   1      unsigned char temp1,temp2;
- 202   1              temp1=SPI_Read(STATUS);
- 203   1                temp2=SPI_Read(FIFO_STATUS);
- 204   1                if(temp1==0x40)
- 205   1                      {
- 206   2                              //Delaynms(100);
- 207   2                              LED0=~LED0;
- 208   2                              LED1=~LED1;                     
- 209   2                      }       
- 210   1      }
+ 208   1              return 0;
+ 209   1              else return 1;
+ 210   1      }                                                                  
+ 211                          
+ 212          void checkstatus()
+ 213          {
+ 214   1      unsigned char temp1,temp2;
+ 215   1              temp1=SPI_Read(STATUS);
+ 216   1                temp2=SPI_Read(FIFO_STATUS);
+ 217   1                if(temp1==0x40)
+ 218   1                      {
+ 219   2                              //Delaynms(100);
+ 220   2                              LED0=~LED0;
+ 221   2                              LED1=~LED1;                     
+ 222   2                      }       
+ 223   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =    602    ----
+   CODE SIZE        =    646    ----
    CONSTANT SIZE    =     10    ----
    XDATA SIZE       =     50      29
    PDATA SIZE       =   ----    ----

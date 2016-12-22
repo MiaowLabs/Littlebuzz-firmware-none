@@ -1,0 +1,47 @@
+C51 COMPILER V9.00   SIMPLEKALMAN                                                          12/19/2016 15:28:12 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE SIMPLEKALMAN
+OBJECT MODULE PLACED IN .\Output\simplekalman.obj
+COMPILER INVOKED BY: d:\Keil\C51\BIN\C51.EXE User\simplekalman.c LARGE BROWSE INCDIR(.\Common\inc;.\Driver\inc;.\BSP;.\S
+                    -tartup;.\User) DEBUG OBJECTEXTEND PRINT(.\Listing\simplekalman.lst) OBJECT(.\Output\simplekalman.obj)
+
+line level    source
+
+   1          #include "simplekalman.h"
+   2          #include "math.h"
+   3          
+   4          float k=0;  //Kalman增益
+   5          float p=0;  //预测误差协方差
+   6          float q=0;  //预测误差
+   7          float r=0;  //传感器测量误差
+   8          float x=0;  //返回值
+   9          
+  10          void SimpleKalman(float q1,float r1){
+  11   1              q=q1;
+  12   1              r=r1;   
+  13   1              p = sqrt(q1*q1+r1*r1);
+  14   1      }
+  15          
+  16          float UpdateSimpleKalman(float value){
+  17   1              p+=q;
+  18   1              k=p/(p+r);
+  19   1              x+=k*(value-x);
+  20   1              p*=(1-k);
+  21   1      
+  22   1              return x;
+  23   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    390    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     20      12
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

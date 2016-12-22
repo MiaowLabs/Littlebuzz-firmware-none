@@ -54,6 +54,7 @@ void init_NRF24L01(void);
 uint SPI_RW(uint uchar);
 uchar SPI_Read(uchar reg);
 void SetRX_Mode(void);
+void SetTX_Mode(void);
 uint SPI_RW_Reg(uchar reg, uchar value);
 uint SPI_Read_Buf(uchar reg, uchar *pBuf, uchar uchars);
 uint SPI_Write_Buf(uchar reg, uchar *pBuf, uchar uchars);

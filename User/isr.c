@@ -24,7 +24,7 @@ void Timer1_Update(void) interrupt  3		//100hz
 {  
 //	short tst16 = g_iAccel_X_Axis;
 	i++;
-
+	if(SoftTimer)SoftTimer--;
 	g_Throttle=(float)(255 - RxBuf[1]);	//油门	RxBuf[1]:0-255
 
 	if(g_Throttle>20)//如果油门大于80 即已起飞
@@ -37,7 +37,7 @@ void Timer1_Update(void) interrupt  3		//100hz
 		else{g_CountRunAway=0;}
 	}
 	else{g_CountRunAway=0;} //收到信号退出失控保护
-	if(g_CountRunAway==128){g_Throttle=30;RxBuf[1]=128;RxBuf[2]=128;} //触发失控保护 油门为1半少一点，缓慢下降，俯仰横滚方向舵归中
+	if(g_CountRunAway==128){g_Throttle=30;RxBuf[1]=128;RxBuf[2]=128;} //触发失控保护 油门减低，缓慢下降，俯仰横滚方向舵归中
 
 	
 	g_LastCountRunAway=RxBuf[0];
@@ -56,20 +56,20 @@ void Timer1_Update(void) interrupt  3		//100hz
 //***********************************四元数***********************************
 	IMUupdate(Angle_gx*0.0174533,Angle_gy*0.0174533,Angle_gz*0.0174533,Angle_ax*0.0174533,Angle_ay*0.0174533,Angle_az*0.0174533);
 	//*0.0174533为PI/180 目的是将角度转弧度
-
-	if(123<TxBuf[2]<133)
+/*
+	if(123<RxBuf[2]<133)
 	{
-	TxBuf[2]=128;
+	RxBuf[2]=128;
 	}
-	if(123<TxBuf[3]<133)
+	if(123<RxBuf[3]<133)
 	{
-	TxBuf[3]=128;
+	RxBuf[3]=128;
 	}
-	if(113<TxBuf[4]<143)
+	if(113<RxBuf[4]<143)
 	{
-	TxBuf[4]=128;
+	RxBuf[4]=128;
 	}
-
+*/
 	AttitudeControl();
 							  
 	if(g_Throttle>=20)
@@ -88,10 +88,7 @@ void Timer1_Update(void) interrupt  3		//100hz
   	OutData[1] = Angle_gy;
    	OutData[2] = pitch;//对应Angle_gy
    	OutData[3] = roll; //对应Angle_gx 对应硬件Y轴  
-//	OutData[0] = g_fOffsetx;
- // 	OutData[1] = g_fOffsety;   	
-//	OutData[2] = g_fPower;
-//  	OutData[3] = yaw; 
+
    	OutPut_Data();		
 		 	  
 #endif	 		
@@ -100,7 +97,7 @@ void Timer1_Update(void) interrupt  3		//100hz
    		if(g_ucLEDCount >=125) //LED1灯1秒交替闪烁
    		{
 			g_ucLEDCount=0;
-	 		LED_GREEN = ~LED_GREEN;
+	 		LED_RED = ~LED_RED;
    		}
 			 
 }

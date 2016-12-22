@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   IMU                                                                   09/11/2016 18:20:07 PAGE 1   
+C51 COMPILER V9.00   IMU                                                                   12/19/2016 15:28:11 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE IMU
@@ -62,7 +62,7 @@ line level    source
   51   1        gz = gz + Kp*ez + ezInt;                                                                                      
   52   1                                                 
   53   1        q0 = q0 + (-q1*gx - q2*gy - q3*gz)*halfT;
-C51 COMPILER V9.00   IMU                                                                   09/11/2016 18:20:07 PAGE 2   
+C51 COMPILER V9.00   IMU                                                                   12/19/2016 15:28:11 PAGE 2   
 
   54   1        q1 = q1 + (q0*gx + q2*gz - q3*gy)*halfT;
   55   1        q2 = q2 + (q0*gy - q1*gz + q3*gx)*halfT;

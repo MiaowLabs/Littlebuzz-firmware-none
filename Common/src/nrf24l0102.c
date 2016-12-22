@@ -146,8 +146,20 @@ uint SPI_Write_Buf(uchar reg, uchar *pBuf, uchar uchars)
 void SetRX_Mode(void)
 {
 	CE=0;
-	SPI_RW_Reg(WRITE_REG + CONFIG2, 0x0f);   		// IRQ收发完成中断响应，16位CRC	，主接收
+	SPI_RW_Reg(WRITE_REG+STATUS,0xff);
+	SPI_RW_Reg(FLUSH_RX, 0x00);
+	SPI_RW_Reg(WRITE_REG + CONFIG2, 0x7f);   		// IRQ收发完成中断响应，16位CRC	，主接收
 	CE = 1; 
+	inerDelay_us(2600);   
+}
+void SetTX_Mode(void)
+{
+	CE=0;
+	SPI_RW_Reg(WRITE_REG+STATUS,0xff);
+	SPI_RW_Reg(FLUSH_TX, 0x00);
+	SPI_RW_Reg(WRITE_REG + CONFIG2, 0x7e);   		// IRQ收发完成中断响应，16位CRC	，主接收
+	CE = 1; 
+	inerDelay_us(2600);   
 }
 /******************************************************************************************************/
 /*函数：unsigned char nRF24L01_RxPacket(unsigned char* rx_buf)
@@ -155,19 +167,20 @@ void SetRX_Mode(void)
 /******************************************************************************************************/
 unsigned char nRF24L01_RxPacket(unsigned char* rx_buf)
 {
-	
-  unsigned char revale=0;
+  	unsigned char revale=0;
   	//DisableInterrupts;
 	sta=SPI_Read(STATUS);	// 读取状态寄存其来判断数据接收状况
+	SPI_RW_Reg(WRITE_REG+STATUS,sta);   //接收到数据后RX_DR,TX_DS,MAX_PT都置高为1，通过写1来清楚中断标志
 	if(RX_DR)				// 判断是否接收到数据
 	{
 	    CE = 0; 			//SPI使能
 		SPI_Read_Buf(RD_RX_PLOAD,rx_buf,TX_PLOAD_WIDTH);// read receive payload from RX_FIFO buffer
 		revale =1;			//读取数据完成标志
+		CE=1; 
 	}
-	SPI_RW_Reg(WRITE_REG+STATUS,sta);   //接收到数据后RX_DR,TX_DS,MAX_PT都置高为1，通过写1来清楚中断标志
-	   CE=1; 
-	// EnableInterrupts;                                                                      //！！！！！！！！！！！！！！！！！！！！！！！！！！！！！
+	
+	
+	// EnableInterrupts;                                                                      
 	return revale;
 }
 /***********************************************************************************************************
@@ -179,10 +192,10 @@ void nRF24L01_TxPacket(unsigned char * tx_buf)
 	SPI_RW_Reg(WRITE_REG+STATUS,0xff);
 	SPI_RW_Reg(0xE1,0xff);
 	CE=0;		
+	SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, RX_ADDRESS, RX_ADR_WIDTH); // 写接收端地址
 	SPI_Write_Buf(WR_TX_PLOAD, tx_buf, TX_PLOAD_WIDTH); 			     
-	SPI_RW_Reg(WRITE_REG + CONFIG2, 0x0e);   		
 	CE=1;		 
-	inerDelay_us(10);   //CE高电平大于10us才能进入发射模式
+	inerDelay_us(200);   //CE高电平大于10us才能进入发射模式
 }
 
 unsigned char NRF24L01_Check(void)

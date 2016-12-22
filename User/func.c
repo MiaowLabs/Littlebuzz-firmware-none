@@ -5,9 +5,28 @@
 喵呜实验室版权所有
 /********************************************************************/
 #include "includes.h"
+unsigned short SoftTimer=0;
+int Compensation=0;
+unsigned char code Throttle[130]={		//专家数据存储，4.3V时最大油门补偿59
+									59,59,58,57,56, 56,55,54,53,52,	 //3.0-3.1V
+									51,50,49,48,47, 47,46,46,45,45,	 //3.1-3.2V
+									45,44,44,43,42, 42,41,41,40,40,	 //3.2-3.3V
+									39,39,38,37,36, 35,34,34,33,33,	 //3.3-3.4V
+									33,33,32,32,32, 32,31,31,30,30,	 //3.4-3.5V
+									29,29,28,28,28, 28,28,28,27,27,	 //3.5-3.6V
+									27,27,26,26,25, 25,24,24,23,23,	 //3.6-3.7V
+									22,22,21,21,20, 20,20,19,18,18,	 //3.7-3.8V
+									17,17,16,16,15, 15,15,14,14,13,	 //3.8-3.9V
+									13,13,12,12,12, 11,11,10,10,10,	 //3.9-4.0V
+									9 ,9 ,9 ,9 ,8 , 8 ,8 ,7 ,7 ,7 ,	 //4.0-4.1V
+									6 ,6 ,6 ,6 ,6 , 5 ,5 ,5 ,5 ,5 ,	 //4.1-4.2V
+									4 ,4 ,3 ,3 ,2 , 2 ,1 ,1 ,0 ,0 ,  //4.2-4.3V
+
+									} ;
+float module,Comp=110;
 float g_Throttle; //油门
 char th;
-float code g_Th[3]={4,3.5,4};		//分段油门
+//float code g_Th[3]={4,3.5,4};		//分段油门
 int PWM1=0,PWM2=0,PWM3=0,PWM4=0;
 unsigned char unlock=0;
 
@@ -16,7 +35,8 @@ int MotorOut1,MotorOut2,MotorOut3,MotorOut4;
 double pitch, yaw, roll;
 double Angle_ax, Angle_ay, Angle_az;
 double Angle_gx, Angle_gy, Angle_gz;
-unsigned char g_fPower;
+float g_fPower,g_fPowerM,g_fPower_Last;
+int g_iPower_Limit;
 int g_fGyroXOffset,g_fGyroYOffset,g_fGyroZOffset;
 char g_fOffsetx=0,g_fOffsety=0;
 unsigned int xdata g_uiStartCount;
@@ -68,8 +88,10 @@ float code g_fcYAngle_P_In=0.6; //max 0.6
 float code g_fcYAngle_I_In=0.01; //
 float code g_fcYAngle_D_In=2.0; //max 5
 
-float code g_fcZAngle_P=5.0;//5
-float code g_fcZAngle_D=4.0; //4
+float code g_fcZAngle_P=4.5;//5
+float code g_fcZAngle_D=3.5; //4
+float code g_fcZAngle_I=0.1;
+float Z_integral=0;
 float Anglezlate;
 float g_fYAngleErrorIntegral_IN;
 float gyro_y_Last,gyro_x_Last,gyro_z_Last;   //储存上一次角速度数据
@@ -98,12 +120,14 @@ void DriversInit(void)
   	Timer1Init();
 	PWMInit();
 	Uart1Init();
+	ADCInit();
 
 }
 
 void ParametersInit()
 {
 	g_fPower = 0;
+	g_fPower_Last=0;
 	g_fGyroXOffset=g_fGyroYOffset=g_fGyroZOffset=0;	
 }
 
@@ -223,10 +247,18 @@ void LEDRUN()
 ***************************************************************/
 void BatteryChecker()
 {
+	float fValue;
+	fValue = GetADCResult();	 				//参考电压5.02V 检测max4.3V min3.0V
+	fValue = fValue / 256.0 * 5.02 ;	 			
 
-	g_fPower = GetADCResult();	 				//参考电压5.02V 检测max4.2V min3.7V
-//	g_fPower = g_fPower / 206 * 4200;	 		//3.7/5.02*256=188	   4.2/5.02*256=214
-	if(g_fPower <= 180)						
+	g_fPower=UpdateSimpleKalman(fValue);//一阶kalman滤波
+	g_fPower=g_fPower*0.01+g_fPower_Last*0.99;//低通
+	g_fPower_Last = g_fPower;
+	g_iPower_Limit = (int)(g_fPower*100);//限幅
+	if(g_iPower_Limit>430) g_iPower_Limit=430;
+	if(g_iPower_Limit<300)	g_iPower_Limit=300;
+		
+	if((int)g_iPower_Limit <= 370)						
 	{
 		LED_RED=0;
 	}
@@ -240,27 +272,35 @@ void BatteryChecker()
 void TickSound(void)
 {
 	PWMCKS=0x10;         
-	T2L = 0xEB;	
+	T2L = 0xDB;	
 	T2H = 0xFF;
 	PWM(960,960,960,960);
 	Delaynms(100); //校准完毕滴一声
     PWM(1000,1000,1000,1000);	
     PWMCKS=0x00;
-	T2L = 0xD5;			//设定定时初值
-	T2H = 0xFF;			//设定定时初值			
+	T2L = 0xC5;		//设定定时初值
+	T2H = 0xFF;		//设定定时初值			
 }
 
 void AttitudeControl()
 {
-	g_fZAngleRemote= ((float)TxBuf[4]-128)*1.5;
-	Angle_gz=g_fZAngleRemote-Angle_gz; 
-	g_fZAngleCtrOut=Angle_gz*g_fcZAngle_P+(Angle_gz-Anglezlate)*g_fcZAngle_D;
+	if(RxBuf[4]>=143){ g_fZAngleRemote = ((float)RxBuf[4]-143)*1.5f;}
+	else if	(RxBuf[4]<=113){ g_fZAngleRemote = ((float)RxBuf[4]-113)*1.5f;}
+	else {g_fZAngleRemote = 0;}
+	Angle_gz= g_fZAngleRemote-Angle_gz; 
+	Z_integral += Angle_gz;
+	if(g_Throttle<40)  Z_integral=0;//油门小于40积分清零
+	if(Z_integral>1000)	Z_integral =1000;
+	else if(Z_integral<(-1000))	Z_integral = (-1000);
+	g_fZAngleCtrOut = Angle_gz*g_fcZAngle_P + Z_integral * g_fcZAngle_I;
+	if(g_fZAngleCtrOut > 150) g_fZAngleCtrOut=150;
+	else if	(g_fZAngleCtrOut < (-150)) g_fZAngleCtrOut=(-150);
 
-	Anglezlate=Angle_gz;
 
 //X轴 
 	g_fXAngleRemote = ((float)RxBuf[2]- 128)/7;	 //max 128/7=18
 //外环
+	roll -= g_fOffsetx;
 	g_fXAngleError = g_fXAngleRemote - roll + g_fOffsetx; //ROLL对应硬件X轴
 
 	if(g_Throttle>20)
@@ -301,7 +341,8 @@ void AttitudeControl()
 //Y轴部分
 	g_fYAngleRemote = ((float)RxBuf[3]- 128)/7;	 //max18
 //外环
-	g_fYAngleError = g_fYAngleRemote - pitch + g_fOffsety ; //ROLL对应硬件X轴
+	pitch -= g_fOffsety;
+	g_fYAngleError = g_fYAngleRemote - pitch  ; //ROLL对应硬件X轴
 
 	if(g_Throttle>20)
 	{
@@ -334,14 +375,22 @@ void AttitudeControl()
     if(g_fYAngleCtrOut>1000){g_fYAngleCtrOut=1000;}  //输出量限幅
 	if(g_fYAngleCtrOut<-1000){g_fYAngleCtrOut=-1000;}
 
+	
+	//油门补偿	
+	Comp = 76.0f+Throttle[g_iPower_Limit-300]+Compensation;
+	g_Throttle += Comp*g_Throttle/127.0f;
+	
+	//倾角补偿
+	////角度转变弧度的单位 #define AtR 0.0174533f  //pi/180
+	module = sqrt(roll*roll+pitch*pitch);
+	g_Throttle += g_Throttle * (1.0f - cos(module * 0.0174533f));
+
 	MotorOut2= (int)(g_Throttle * 4 + g_fYAngleCtrOut - g_fXAngleCtrOut+ g_fZAngleCtrOut );	//255*4=1020
 	MotorOut4= (int)(g_Throttle * 4 - g_fYAngleCtrOut + g_fXAngleCtrOut+ g_fZAngleCtrOut ); 		
 	MotorOut1= (int)(g_Throttle * 4 - g_fYAngleCtrOut - g_fXAngleCtrOut- g_fZAngleCtrOut );
 	MotorOut3= (int)(g_Throttle * 4 + g_fYAngleCtrOut + g_fXAngleCtrOut- g_fZAngleCtrOut );
-//	MotorOut2= (int)(g_Throttle * 4 + g_fYAngleCtrOut );	//255*4=1020
-//	MotorOut4= (int)(g_Throttle * 4 - g_fYAngleCtrOut ); 		
-//	MotorOut1= (int)(g_Throttle * 4 - g_fYAngleCtrOut );
-//	MotorOut3= (int)(g_Throttle * 4 + g_fYAngleCtrOut );
+
+
 	PWM1=(1000 - MotorOut1 );	  
 	if(PWM1>1000){PWM1=1000;}
 	else if(PWM1<0){PWM1=0;}

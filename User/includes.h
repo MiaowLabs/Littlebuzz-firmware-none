@@ -36,5 +36,6 @@
 
 //函数头文件
 #include "func.h"
+#include "simplekalman.h"
 
 #endif

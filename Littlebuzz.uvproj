@@ -318,7 +318,7 @@
             <DataOverlaying>1</DataOverlaying>
             <OverlayString></OverlayString>
             <MiscControls></MiscControls>
-            <DisableWarningNumbers></DisableWarningNumbers>
+            <DisableWarningNumbers>16,15</DisableWarningNumbers>
             <LinkerCmdFile></LinkerCmdFile>
             <Assign></Assign>
             <ReserveString></ReserveString>
@@ -460,6 +460,11 @@
               <FileName>func.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\User\func.h</FilePath>
+            </File>
+            <File>
+              <FileName>simplekalman.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\simplekalman.c</FilePath>
             </File>
           </Files>
         </Group>

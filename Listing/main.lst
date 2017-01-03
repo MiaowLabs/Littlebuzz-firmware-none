@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   MAIN                                                                  12/22/2016 15:11:33 PAGE 1   
+C51 COMPILER V9.00   MAIN                                                                  01/03/2017 16:38:06 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
@@ -41,12 +41,12 @@ line level    source
   31   1              LEDRUN();//电机臂跑马灯 
   32   1      
   33   1              GetGyroRevise();//校正陀螺仪    
-  34   1      //      LED_GREEN = 1; //绿灯灭 太刺眼
+  34   1      //      LED_GREEN = 1; //绿灯灭
   35   1              ParametersInit();//系统参数初始化
-  36   1              SimpleKalman(0.3,1.0);
-  37   1              Delaynms(50);   
+  36   1              SimpleKalman(0.3,1.0); //一维卡尔曼滤波初始化
+  37   1              Delaynms(50);//延时50ms 
   38   1              
-  39   1              IAPRead(); //读取IAP数据
+  39   1              IAPRead(); //若果检测到更新过数据就读出来，读取IAP数据
   40   1      
   41   1              while(NRF24L01_Check())//检测不到24L01
   42   1              {
@@ -62,7 +62,7 @@ line level    source
   52   1              RxBuf[1]=255; //油门通道
   53   1              RxBuf[2]=128; //俯仰
   54   1              RxBuf[3]=128; //横滚
-C51 COMPILER V9.00   MAIN                                                                  12/22/2016 15:11:33 PAGE 2   
+C51 COMPILER V9.00   MAIN                                                                  01/03/2017 16:38:06 PAGE 2   
 
   55   1              RxBuf[4]=128;//yaw
   56   1              
@@ -88,56 +88,55 @@ line level    source
   76   2                nRF24L01_RxPacket(RxBuf);
   77   2                BatteryChecker();
   78   2               
-  79   2              if(RxBuf[5]==1)    //you
+  79   2              if(RxBuf[5]==1)    //开关右侧按钮-->校正加速度计
   80   2                {
-  81   3                  DisableInterrupts();
+  81   3                  DisableInterrupts();//关闭中断，防止干扰到IAP写入
   82   3                      IAP_Angle();
   83   3                      RxBuf[5]=0;
   84   3                      TickSound();
   85   3                      EnableInterrupts(); 
   86   3                }
-  87   2                if(RxBuf[6]==1)  //zuo
+  87   2                if(RxBuf[6]==1)  //开关左侧按钮-->校正陀螺仪
   88   2                {
-  89   3                      DisableInterrupts();
+  89   3                      DisableInterrupts();//关闭中断，防止干扰到IAP写入
   90   3                      IAP_Gyro();
   91   3                      RxBuf[6]=0;
   92   3                      TickSound();
   93   3                  EnableInterrupts();
   94   3                }
-  95   2      
-  96   2                if(i>=10)
-  97   2              {
-  98   3                              i=0;
-  99   3                        if(RxBuf[8]==1)         //y
- 100   3                        {
- 101   4                              RxBuf[8]=0;
- 102   4                              g_fOffsety-=1;
- 103   4                      //      TickSound();
- 104   4                        }     
- 105   3                        if(RxBuf[10]==1)
- 106   3                        {
- 107   4                              RxBuf[10]=0;
- 108   4                              g_fOffsety+=1;
- 109   4                      //      TickSound();
- 110   4                        }     
- 111   3                        if(RxBuf[7]==1)         //x
- 112   3                        {
- 113   4                              RxBuf[7]=0;
- 114   4                              g_fOffsetx-=1;
- 115   4                      //      TickSound();
- 116   4                        }     
-C51 COMPILER V9.00   MAIN                                                                  12/22/2016 15:11:33 PAGE 3   
+  95   2                
+  96   2                if(i>=10){
+  97   3                 i=0;
+  98   3                 if(RxBuf[8]==1)        //y  微调按钮
+  99   3                 {
+ 100   4                        RxBuf[8]=0;
+ 101   4                        g_fOffsety-=1;
+ 102   4                      //TickSound();
+ 103   4                 }    
+ 104   3                 if(RxBuf[9]==1)
+ 105   3                 {
+ 106   4                        RxBuf[9]=0;
+ 107   4                        g_fOffsety+=1;
+ 108   4                      //TickSound();
+ 109   4                        }     
+ 110   3                        if(RxBuf[10]==1)        //x
+ 111   3                        {
+ 112   4                              RxBuf[10]=0;
+ 113   4                              g_fOffsetx-=1;
+ 114   4                      //      TickSound();
+ 115   4                        }     
+ 116   3                        if(RxBuf[7]==1)
+C51 COMPILER V9.00   MAIN                                                                  01/03/2017 16:38:06 PAGE 3   
 
- 117   3                        if(RxBuf[9]==1)
- 118   3                        {
- 119   4                              RxBuf[9]=0;
- 120   4                              g_fOffsetx+=1;
- 121   4                      //      TickSound();
- 122   4                        }                             
- 123   3              }
- 124   2      
- 125   2                
- 126   2      #if 0//DEBUG_UART  //调试启用 预编译命令
+ 117   3                        {
+ 118   4                              RxBuf[7]=0;
+ 119   4                              g_fOffsetx+=1;
+ 120   4                      //      TickSound();
+ 121   4                        }                             
+ 122   3                      }
+ 123   2      
+ 124   2                
+ 125   2      #if 0//DEBUG_UART  //调试启用 预编译命令
               
                       OutData[0] = 45;
                       OutData[1] = 90;  
@@ -147,9 +146,9 @@ line level    source
                       OutPut_Data();          
                                 
               #endif                  
- 136   2                                              
- 137   2              }
- 138   1      }
+ 135   2                                              
+ 136   2              }
+ 137   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE

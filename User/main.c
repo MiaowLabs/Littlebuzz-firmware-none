@@ -31,12 +31,12 @@ void main()
 	LEDRUN();//电机臂跑马灯 
 
 	GetGyroRevise();//校正陀螺仪	
-//	LED_GREEN = 1; //绿灯灭 太刺眼
+//	LED_GREEN = 1; //绿灯灭
 	ParametersInit();//系统参数初始化
-	SimpleKalman(0.3,1.0);
-	Delaynms(50);	
+	SimpleKalman(0.3,1.0); //一维卡尔曼滤波初始化
+	Delaynms(50);//延时50ms	
 	
-	IAPRead(); //读取IAP数据
+	IAPRead(); //若果检测到更新过数据就读出来，读取IAP数据
 
 	while(NRF24L01_Check())//检测不到24L01
 	{
@@ -76,51 +76,50 @@ void main()
 	  nRF24L01_RxPacket(RxBuf);
 	  BatteryChecker();
 	 
-	if(RxBuf[5]==1)	   //you
+	if(RxBuf[5]==1)	   //开关右侧按钮-->校正加速度计
 	  {
-	    DisableInterrupts();
+	    DisableInterrupts();//关闭中断，防止干扰到IAP写入
 		IAP_Angle();
 		RxBuf[5]=0;
 		TickSound();
 		EnableInterrupts(); 
 	  }
-	  if(RxBuf[6]==1)  //zuo
+	  if(RxBuf[6]==1)  //开关左侧按钮-->校正陀螺仪
 	  {
-	  	DisableInterrupts();
+	  	DisableInterrupts();//关闭中断，防止干扰到IAP写入
 		IAP_Gyro();
 		RxBuf[6]=0;
 		TickSound();
 	    EnableInterrupts();
 	  }
-
-	  if(i>=10)
-	{
-			i=0;
-		  if(RxBuf[8]==1)	  //y
-		  {
-		  	RxBuf[8]=0;
-		  	g_fOffsety-=1;
-		//	TickSound();
+	  
+	  if(i>=10){
+	   i=0;
+	   if(RxBuf[8]==1)	  //y  微调按钮
+	   {
+		  RxBuf[8]=0;
+		  g_fOffsety-=1;
+		//TickSound();
+	   }	
+	   if(RxBuf[9]==1)
+	   {
+		  RxBuf[9]=0;
+		  g_fOffsety+=1;
+		//TickSound();
 		  }	
-		  if(RxBuf[10]==1)
+		  if(RxBuf[10]==1)	  //x
 		  {
 		  	RxBuf[10]=0;
-		  	g_fOffsety+=1;
-		//	TickSound();
-		  }	
-		  if(RxBuf[7]==1)	  //x
-		  {
-		  	RxBuf[7]=0;
 		  	g_fOffsetx-=1;
 		//	TickSound();
 		  }	
-		  if(RxBuf[9]==1)
+		  if(RxBuf[7]==1)
 		  {
-		  	RxBuf[9]=0;
+		  	RxBuf[7]=0;
 		  	g_fOffsetx+=1;
 		//	TickSound();
 		  }				
-	}
+		}
 
 	  
 #if 0//DEBUG_UART  //调试启用 预编译命令

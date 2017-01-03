@@ -1,4 +1,4 @@
-C51 COMPILER V9.00   FUNC                                                                  12/22/2016 15:11:34 PAGE 1   
+C51 COMPILER V9.00   FUNC                                                                  01/03/2017 16:38:06 PAGE 1   
 
 
 C51 COMPILER V9.00, COMPILATION OF MODULE FUNC
@@ -62,7 +62,7 @@ line level    source
   52          float g_fGyroAngleSpeed;                        //角速度                        
   53          float g_fGyroscopeAngleIntegral;        //角速度积分值
   54          float g_fGravityAngle;                          //加速度初步计算得到的倾角
-C51 COMPILER V9.00   FUNC                                                                  12/22/2016 15:11:34 PAGE 2   
+C51 COMPILER V9.00   FUNC                                                                  01/03/2017 16:38:06 PAGE 2   
 
   55          int g_iGyroOffset;
   56          /******速度控制参数******/
@@ -126,7 +126,7 @@ line level    source
  114          ********************喵呜实验室版权所有**************************
  115          ***************************************************************/
  116          void DriversInit(void)
-C51 COMPILER V9.00   FUNC                                                                  12/22/2016 15:11:34 PAGE 3   
+C51 COMPILER V9.00   FUNC                                                                  01/03/2017 16:38:06 PAGE 3   
 
  117          {
  118   1      
@@ -190,7 +190,7 @@ line level    source
  176   1              g_iAccel_Y_Axis  = DataSynthesis(ACCEL_YOUT_H); //加速度Y轴
  177   1              g_iAccel_Z_Axis  = DataSynthesis(ACCEL_ZOUT_H); //加速度Z轴
  178   1      }
-C51 COMPILER V9.00   FUNC                                                                  12/22/2016 15:11:34 PAGE 4   
+C51 COMPILER V9.00   FUNC                                                                  01/03/2017 16:38:06 PAGE 4   
 
  179          
  180          /***************************************************************
@@ -254,7 +254,7 @@ line level    source
  238          ** 官    网：http://www.miaowlabs.com
  239          ** 淘    宝：http://miaowlabs.taobao.com
  240          ** 日　  期: 20160415
-C51 COMPILER V9.00   FUNC                                                                  12/22/2016 15:11:34 PAGE 5   
+C51 COMPILER V9.00   FUNC                                                                  01/03/2017 16:38:06 PAGE 5   
 
  241          ** 函数名称: BatteryChecker
  242          ** 功能描述: 电量检测（若电量不足，将亮起红灯）           
@@ -318,7 +318,7 @@ line level    source
  300   1      //X轴 
  301   1              g_fXAngleRemote = ((float)RxBuf[2]- 128)/7;      //max 128/7=18
  302   1      //外环
-C51 COMPILER V9.00   FUNC                                                                  12/22/2016 15:11:34 PAGE 6   
+C51 COMPILER V9.00   FUNC                                                                  01/03/2017 16:38:06 PAGE 6   
 
  303   1              roll -= g_fOffsetx;
  304   1              g_fXAngleError = g_fXAngleRemote - roll + g_fOffsetx; //ROLL对应硬件X轴
@@ -382,7 +382,7 @@ line level    source
  361   1              if(g_Throttle>20)
  362   1              {
  363   2                      g_fYAngleErrorIntegral_IN += g_fYAngleError_In;//(油门小于某个值时不积分)
-C51 COMPILER V9.00   FUNC                                                                  12/22/2016 15:11:34 PAGE 7   
+C51 COMPILER V9.00   FUNC                                                                  01/03/2017 16:38:06 PAGE 7   
 
  364   2              }
  365   1              else
